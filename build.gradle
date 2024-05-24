@@ -4,6 +4,7 @@
 
 plugins {
   id 'java'
+  id 'distribution'
   id 'maven-publish'
   id 'java-library'
   id 'com.diffplug.spotless' version '6.13.0'
@@ -38,7 +39,7 @@ publishing {
           developer {
             name = 'Jens Deppe'
             email = 'jens.deppe@broadcom.com'
-            organization= 'Broadcom'
+            organization = 'Broadcom'
             organizationUrl = 'https://broadcom.com'
           }
         }
@@ -71,6 +72,10 @@ publishing {
   }
 }
 
+configurations {
+  distribution
+}
+
 dependencies {
   api 'com.vmware.gemfire:gemfire-core:10.1.1'
   api 'com.vmware.gemfire:gemfire-logging:10.1.1'
@@ -92,6 +97,61 @@ java {
 
 test {
   useJUnit()
+}
+
+import groovy.xml.*
+import org.gradle.util.VersionNumber
+
+final jbossModuleName = "${project.group}.${project.name}:${VersionNumber.parse(project.version).major}"
+
+tasks.register("generateModuleXml") { task ->
+  final file = file(task.temporaryDir.toPath().resolve("module.xml"))
+  doLast {
+    file.withWriter { writer ->
+      def xml = new MarkupBuilder(new IndentPrinter(writer, "  ", true))
+      xml.doubleQuotes = true
+      xml.mkp.xmlDeclaration(version: '1.0', encoding: 'utf-8')
+      xml.module(xmlns: 'urn:jboss:module:1.9', 'name': jbossModuleName) {
+        resources {
+          'resource-root'('path': tasks.named('jar').get().outputs.files.singleFile.name)
+          configurations.distribution.files.forEach() { dep ->
+            'resource-root'('path': dep.name)
+          }
+        }
+        delegate.dependencies {
+          module('name': 'java.se', 'export': 'false', 'optional': 'false', 'services': 'import')
+          module('name': 'gemfire', 'export': 'false', 'optional': 'false', 'services': 'import')
+        }
+      }
+    }
+  }
+  outputs.file(file)
+}
+
+distributions {
+  main {
+    distributionBaseName = distributionPrefix
+    contents {
+      into('lib') {
+        from(jar)
+        from(configurations.distribution)
+      }
+    }
+  }
+  extension {
+    distributionBaseName = distributionPrefix
+    contents {
+      with copySpec {
+        into(jbossModuleName.replaceAll('[.:]', '/'))
+        from(jar)
+        from(configurations.distribution)
+        from(generateModuleXml)
+      }
+      with copySpec {
+        from('src/main/dist')
+      }
+    }
+  }
 }
 
 spotless {
@@ -136,18 +196,18 @@ spotless {
     // Enforce style modifier order
     custom 'Modifier ordering', {
       def modifierRanking = [
-        "public"      : 1,
-        "protected"   : 2,
-        "private"     : 3,
-        "abstract"    : 4,
-        "default"     : 5,
-        "static"      : 6,
-        "final"       : 7,
-        "transient"   : 8,
-        "volatile"    : 9,
-        "synchronized": 10,
-        "native"      : 11,
-        "strictfp"    : 12]
+          "public"      : 1,
+          "protected"   : 2,
+          "private"     : 3,
+          "abstract"    : 4,
+          "default"     : 5,
+          "static"      : 6,
+          "final"       : 7,
+          "transient"   : 8,
+          "volatile"    : 9,
+          "synchronized": 10,
+          "native"      : 11,
+          "strictfp"    : 12]
       // Find any instance of multiple modifiers. Lead with a non-word character to avoid
       // accidental matching against for instance, "an alternative default value"
       it.replaceAll(/\W(?:public |protected |private |abstract |default |static |final |transient |volatile |synchronized |native |strictfp ){2,}/, {
