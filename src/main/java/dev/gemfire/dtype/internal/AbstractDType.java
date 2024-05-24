@@ -1,0 +1,142 @@
+/*
+ * Copyright 2024 Broadcom. All rights reserved.
+ */
+
+package dev.gemfire.dtype.internal;
+
+import static org.apache.geode.util.internal.UncheckedUtils.uncheckedCast;
+
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.util.Objects;
+
+import dev.gemfire.dtype.DType;
+
+import org.apache.geode.DataSerializable;
+import org.apache.geode.DataSerializer;
+import org.apache.geode.Delta;
+import org.apache.geode.InvalidDeltaException;
+import org.apache.geode.cache.Region;
+import org.apache.geode.internal.HeapDataOutputStream;
+import org.apache.geode.internal.serialization.ByteArrayDataInput;
+
+public abstract class AbstractDType implements Delta, DataSerializable, DType {
+
+  private String name;
+  private transient Region<String, Object> region;
+  private DTypeCollectionsFunction deltaOperation = null;
+  private transient OperationPerformer operationPerformer;
+
+  public AbstractDType() {}
+
+  public AbstractDType(String name) {
+    this.name = name;
+  }
+
+  @Override
+  public String getName() {
+    return name;
+  }
+
+  public void destroy() {
+    region.remove(name);
+  }
+
+  public void initialize(Region<String, Object> region, OperationPerformer operationPerformer) {
+    this.region = region;
+    this.operationPerformer = operationPerformer;
+  }
+
+  protected <T> T getEntry() {
+    return uncheckedCast(region.get(name));
+  }
+
+  public void updateEntry() {
+    region.put(name, this);
+  }
+
+  protected void setDelta(DTypeCollectionsFunction fn) {
+    deltaOperation = fn;
+  }
+
+  public <T> T query(DTypeFunction fn, String gemfireFunctionId) {
+    return operationPerformer.performOperation(this, fn, false, gemfireFunctionId);
+  }
+
+  public <T> T update(DTypeFunction fn, String gemfireFunctionId) {
+    T result = operationPerformer.performOperation(this, fn, true, gemfireFunctionId);
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    AbstractDType that = (AbstractDType) o;
+    return Objects.equals(name, that.name);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(name);
+  }
+
+  @Override
+  public void toData(DataOutput out) throws IOException {
+    DataSerializer.writeString(name, out);
+  }
+
+  @Override
+  public void fromData(DataInput in) throws IOException, ClassNotFoundException {
+    name = DataSerializer.readString(in);
+  }
+
+  @Override
+  public boolean hasDelta() {
+    return deltaOperation != null;
+  }
+
+  @Override
+  public void toDelta(DataOutput out) throws IOException {
+    DataSerializer.writeObject(deltaOperation, out);
+  }
+
+  @Override
+  public void fromDelta(DataInput in) throws IOException, InvalidDeltaException {
+    try {
+      DTypeCollectionsFunction fn = DataSerializer.readObject(in);
+      fn.apply(this);
+    } catch (ClassNotFoundException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  protected byte[] serialize(Object o) {
+    HeapDataOutputStream heap = new HeapDataOutputStream(0);
+    try {
+      DataSerializer.writeObject(o, heap);
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
+    return heap.toByteArray();
+  }
+
+  protected <R> R deserialize(byte[] data) {
+    R result;
+    try {
+      result = DataSerializer.readObject(new ByteArrayDataInput(data));
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    } catch (ClassNotFoundException e) {
+      throw new RuntimeException(e);
+    }
+
+    return result;
+  }
+}
