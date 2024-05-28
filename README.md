@@ -11,6 +11,7 @@ These types are intended to be used from GemFire clients.
 
 - DSet
 - DList
+- DBlockingDeque
 
 ### Concurrency types
 

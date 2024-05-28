@@ -27,12 +27,16 @@ public class CollectionsBackendFunction implements Function<Object> {
 
     Object result;
     synchronized (entry) {
-      if (isUpdate) {
-        entry.setDelta(fn);
-        result = fn.apply(entry);
-        region.put(name, entry);
-      } else {
-        result = fn.apply(entry);
+      try {
+        if (isUpdate) {
+          entry.setDelta(fn);
+          result = fn.apply(entry);
+          region.put(name, entry);
+        } else {
+          result = fn.apply(entry);
+        }
+      } catch (Exception e) {
+        throw new MarkerException(e);
       }
     }
 

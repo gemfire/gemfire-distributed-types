@@ -39,9 +39,13 @@ public class SemaphoreBackendFunction implements Function<Object> {
 
     Object result;
     synchronized (entry) {
-      result = fn.apply(entry, new DSemaphoreFunctionContext(memberId, tracker));
-      if (isUpdate) {
-        region.put(name, entry);
+      try {
+        result = fn.apply(entry, new DSemaphoreFunctionContext(memberId, tracker));
+        if (isUpdate) {
+          region.put(name, entry);
+        }
+      } catch (Exception e) {
+        throw new MarkerException(e);
       }
     }
 
