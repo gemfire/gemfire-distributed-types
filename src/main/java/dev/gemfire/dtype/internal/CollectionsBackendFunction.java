@@ -4,10 +4,13 @@
 
 package dev.gemfire.dtype.internal;
 
+import java.util.concurrent.Callable;
+
 import org.apache.geode.cache.Region;
 import org.apache.geode.cache.execute.Function;
 import org.apache.geode.cache.execute.FunctionContext;
 import org.apache.geode.cache.execute.RegionFunctionContext;
+import org.apache.geode.internal.cache.PartitionedRegion;
 
 public class CollectionsBackendFunction implements Function<Object> {
 
@@ -25,20 +28,40 @@ public class CollectionsBackendFunction implements Function<Object> {
     Region<String, AbstractDType> region = ((RegionFunctionContext) context).getDataSet();
     AbstractDType entry = region.get(name);
 
-    Object result;
-    synchronized (entry) {
-      try {
-        if (isUpdate) {
-          entry.setDelta(fn);
-          result = fn.apply(entry);
-          region.put(name, entry);
-        } else {
-          result = fn.apply(entry);
-        }
-      } catch (Exception e) {
-        throw new MarkerException(e);
+    Callable<Object> wrappingFn = () -> {
+      Object innerResult;
+      if (isUpdate) {
+        entry.setDelta(fn);
+        innerResult = fn.apply(entry);
+        region.put(name, entry);
+      } else {
+        innerResult = fn.apply(entry);
       }
-    }
+      return innerResult;
+    };
+
+    Object result = null;
+    int retrySleepTime;
+    do {
+      retrySleepTime = 0;
+      synchronized (entry) {
+        try {
+          result = ((PartitionedRegion) region).computeWithPrimaryLocked(name, wrappingFn);
+        } catch (RetryableException rex) {
+          retrySleepTime = rex.getRetrySleepTime();
+        } catch (Exception ex) {
+          throw new MarkerException(ex);
+        }
+      }
+      if (retrySleepTime > 0) {
+        try {
+          Thread.sleep(retrySleepTime);
+        } catch (InterruptedException e) {
+          Thread.currentThread().interrupt();
+          throw new MarkerException(e);
+        }
+      }
+    } while (retrySleepTime > 0);
 
     context.getResultSender().lastResult(result);
   }

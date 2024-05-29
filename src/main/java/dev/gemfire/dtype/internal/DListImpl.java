@@ -129,6 +129,13 @@ public class DListImpl<E> extends AbstractDType implements DList<E> {
     }
   }
 
+  /**
+   * {@inheritDoc}
+   * <p>
+   * Note that iteration occurs on the client. As such, the entire structure will be serialized to
+   * the client and then discarded once iteration is complete. Any {@code remove} calls will be
+   * submitted to the structure maintained on the server.
+   */
   @Override
   public Iterator<E> iterator() {
     DListImpl<E> entry = getEntry();
