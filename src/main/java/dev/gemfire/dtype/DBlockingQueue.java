@@ -6,5 +6,5 @@ package dev.gemfire.dtype;
 
 import java.util.concurrent.BlockingDeque;
 
-public interface DBlockingDeque<E> extends BlockingDeque<E> {
+public interface DBlockingQueue<E> extends BlockingDeque<E> {
 }

@@ -7,7 +7,7 @@ package dev.gemfire.dtype;
 import java.util.function.BiFunction;
 
 import dev.gemfire.dtype.internal.DAtomicLongImpl;
-import dev.gemfire.dtype.internal.DBlockingDequeImpl;
+import dev.gemfire.dtype.internal.DBlockingQueueImpl;
 import dev.gemfire.dtype.internal.DListImpl;
 import dev.gemfire.dtype.internal.DSemaphoreImpl;
 import dev.gemfire.dtype.internal.DSetImpl;
@@ -85,19 +85,19 @@ public class DTypeFactory {
   }
 
   @SuppressWarnings("unchecked")
-  public <E> DBlockingDeque<E> createDQueue(String name) {
-    DBlockingDequeImpl<E> value =
-        (DBlockingDequeImpl<E>) region.computeIfAbsent(name, DBlockingDequeImpl::new);
+  public <E> DBlockingQueue<E> createDQueue(String name) {
+    DBlockingQueueImpl<E> value =
+        (DBlockingQueueImpl<E>) region.computeIfAbsent(name, DBlockingQueueImpl::new);
     value.initialize(region, operationPerformer);
 
     return value;
   }
 
   @SuppressWarnings("unchecked")
-  public <E> DBlockingDeque<E> createDQueue(String name, int capacity) {
-    DBlockingDequeImpl<E> value =
-        (DBlockingDequeImpl<E>) region.computeIfAbsent(name,
-            r -> new DBlockingDequeImpl<>(name, capacity));
+  public <E> DBlockingQueue<E> createDQueue(String name, int capacity) {
+    DBlockingQueueImpl<E> value =
+        (DBlockingQueueImpl<E>) region.computeIfAbsent(name,
+            r -> new DBlockingQueueImpl<>(name, capacity));
     value.initialize(region, operationPerformer);
 
     return value;

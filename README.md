@@ -32,6 +32,7 @@ DTypeFactory factory = new DTypeFactory(client);
 DList<String> list = factory.createDList("myList");
 DSet<Account> accounts = factory.createDSet("accounts");
 DSemaphore semaphore = factory.createDSemaphore("semaphore", 1);
+DBlockingQueue queue = factory.createDQueue("queue", 5);
 ```
 
 ### Implementation details

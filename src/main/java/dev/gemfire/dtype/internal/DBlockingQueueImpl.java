@@ -17,23 +17,23 @@ import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 
-import dev.gemfire.dtype.DBlockingDeque;
+import dev.gemfire.dtype.DBlockingQueue;
 
 import org.apache.geode.DataSerializer;
 
-public class DBlockingDequeImpl<E> extends AbstractDType implements DBlockingDeque<E> {
+public class DBlockingQueueImpl<E> extends AbstractDType implements DBlockingQueue<E> {
 
   private LinkedBlockingDeque<E> deque;
   private int capacity;
   private transient ExecutorService executor;
 
-  public DBlockingDequeImpl() {}
+  public DBlockingQueueImpl() {}
 
-  public DBlockingDequeImpl(String name) {
+  public DBlockingQueueImpl(String name) {
     this(name, Integer.MAX_VALUE);
   }
 
-  public DBlockingDequeImpl(String name, int capacity) {
+  public DBlockingQueueImpl(String name, int capacity) {
     super(name);
     deque = new LinkedBlockingDeque<>(capacity);
     this.capacity = capacity;
@@ -44,7 +44,7 @@ public class DBlockingDequeImpl<E> extends AbstractDType implements DBlockingDeq
   public void addFirst(E e) {
     byte[] arg = serialize(e);
     DTypeCollectionsFunction fn = x -> {
-      ((DBlockingDequeImpl<E>) x).deque.addFirst(deserialize(arg));
+      ((DBlockingQueueImpl<E>) x).deque.addFirst(deserialize(arg));
       return null;
     };
     update(fn, CollectionsBackendFunction.ID);
@@ -55,7 +55,7 @@ public class DBlockingDequeImpl<E> extends AbstractDType implements DBlockingDeq
   public void addLast(E e) {
     byte[] arg = serialize(e);
     DTypeCollectionsFunction fn = x -> {
-      ((DBlockingDequeImpl<E>) x).deque.addLast(deserialize(arg));
+      ((DBlockingQueueImpl<E>) x).deque.addLast(deserialize(arg));
       return null;
     };
     update(fn, CollectionsBackendFunction.ID);
@@ -66,7 +66,7 @@ public class DBlockingDequeImpl<E> extends AbstractDType implements DBlockingDeq
   public boolean offerFirst(E e) {
     byte[] arg = serialize(e);
     DTypeCollectionsFunction fn =
-        x -> ((DBlockingDequeImpl<E>) x).deque.offerFirst(deserialize(arg));
+        x -> ((DBlockingQueueImpl<E>) x).deque.offerFirst(deserialize(arg));
     return update(fn, CollectionsBackendFunction.ID);
   }
 
@@ -75,55 +75,55 @@ public class DBlockingDequeImpl<E> extends AbstractDType implements DBlockingDeq
   public boolean offerLast(E e) {
     byte[] arg = serialize(e);
     DTypeCollectionsFunction fn =
-        x -> ((DBlockingDequeImpl<E>) x).deque.offerLast(deserialize(arg));
+        x -> ((DBlockingQueueImpl<E>) x).deque.offerLast(deserialize(arg));
     return update(fn, CollectionsBackendFunction.ID);
   }
 
   @Override
   public E removeFirst() {
-    DTypeCollectionsFunction fn = x -> ((DBlockingDequeImpl<?>) x).deque.removeFirst();
+    DTypeCollectionsFunction fn = x -> ((DBlockingQueueImpl<?>) x).deque.removeFirst();
     return update(fn, CollectionsBackendFunction.ID);
   }
 
   @Override
   public E removeLast() {
-    DTypeCollectionsFunction fn = x -> ((DBlockingDequeImpl<?>) x).deque.removeLast();
+    DTypeCollectionsFunction fn = x -> ((DBlockingQueueImpl<?>) x).deque.removeLast();
     return update(fn, CollectionsBackendFunction.ID);
   }
 
   @Override
   public E pollFirst() {
-    DTypeCollectionsFunction fn = x -> ((DBlockingDequeImpl<?>) x).deque.pollFirst();
+    DTypeCollectionsFunction fn = x -> ((DBlockingQueueImpl<?>) x).deque.pollFirst();
     return update(fn, CollectionsBackendFunction.ID);
   }
 
   @Override
   public E pollLast() {
-    DTypeCollectionsFunction fn = x -> ((DBlockingDequeImpl<?>) x).deque.pollLast();
+    DTypeCollectionsFunction fn = x -> ((DBlockingQueueImpl<?>) x).deque.pollLast();
     return update(fn, CollectionsBackendFunction.ID);
   }
 
   @Override
   public E getFirst() {
-    DTypeCollectionsFunction fn = x -> ((DBlockingDequeImpl<?>) x).deque.getFirst();
+    DTypeCollectionsFunction fn = x -> ((DBlockingQueueImpl<?>) x).deque.getFirst();
     return update(fn, CollectionsBackendFunction.ID);
   }
 
   @Override
   public E getLast() {
-    DTypeCollectionsFunction fn = x -> ((DBlockingDequeImpl<?>) x).deque.getLast();
+    DTypeCollectionsFunction fn = x -> ((DBlockingQueueImpl<?>) x).deque.getLast();
     return update(fn, CollectionsBackendFunction.ID);
   }
 
   @Override
   public E peekFirst() {
-    DTypeCollectionsFunction fn = x -> ((DBlockingDequeImpl<?>) x).deque.peekFirst();
+    DTypeCollectionsFunction fn = x -> ((DBlockingQueueImpl<?>) x).deque.peekFirst();
     return update(fn, CollectionsBackendFunction.ID);
   }
 
   @Override
   public E peekLast() {
-    DTypeCollectionsFunction fn = x -> ((DBlockingDequeImpl<?>) x).deque.peekLast();
+    DTypeCollectionsFunction fn = x -> ((DBlockingQueueImpl<?>) x).deque.peekLast();
     return update(fn, CollectionsBackendFunction.ID);
   }
 
@@ -131,7 +131,7 @@ public class DBlockingDequeImpl<E> extends AbstractDType implements DBlockingDeq
   @SuppressWarnings("unchecked")
   public void putFirst(E e) throws InterruptedException {
     DTypeCollectionsFunction fn = x -> {
-      if (!((DBlockingDequeImpl<E>) x).deque.offerFirst(e)) {
+      if (!((DBlockingQueueImpl<E>) x).deque.offerFirst(e)) {
         throw new RetryableException(100);
       }
       return null;
@@ -143,7 +143,7 @@ public class DBlockingDequeImpl<E> extends AbstractDType implements DBlockingDeq
   @SuppressWarnings("unchecked")
   public void putLast(E e) throws InterruptedException {
     DTypeCollectionsFunction fn = x -> {
-      if (!((DBlockingDequeImpl<E>) x).deque.offerLast(e)) {
+      if (!((DBlockingQueueImpl<E>) x).deque.offerLast(e)) {
         throw new RetryableException(100);
       }
       return null;
@@ -165,7 +165,7 @@ public class DBlockingDequeImpl<E> extends AbstractDType implements DBlockingDeq
   @SuppressWarnings("unchecked")
   public E takeFirst() throws InterruptedException {
     DTypeCollectionsFunction fn = x -> {
-      E result = ((DBlockingDequeImpl<E>) x).deque.pollFirst();
+      E result = ((DBlockingQueueImpl<E>) x).deque.pollFirst();
       if (result == null) {
         throw new RetryableException(100);
       }
@@ -178,7 +178,7 @@ public class DBlockingDequeImpl<E> extends AbstractDType implements DBlockingDeq
   @SuppressWarnings("unchecked")
   public E takeLast() throws InterruptedException {
     DTypeCollectionsFunction fn = x -> {
-      E result = ((DBlockingDequeImpl<E>) x).deque.pollLast();
+      E result = ((DBlockingQueueImpl<E>) x).deque.pollLast();
       if (result == null) {
         throw new RetryableException(100);
       }
@@ -202,7 +202,7 @@ public class DBlockingDequeImpl<E> extends AbstractDType implements DBlockingDeq
   public boolean removeFirstOccurrence(Object o) {
     byte[] arg = serialize(o);
     DTypeCollectionsFunction fn =
-        x -> ((DBlockingDequeImpl<E>) x).deque.removeFirstOccurrence(deserialize(arg));
+        x -> ((DBlockingQueueImpl<E>) x).deque.removeFirstOccurrence(deserialize(arg));
     return update(fn, CollectionsBackendFunction.ID);
   }
 
@@ -211,7 +211,7 @@ public class DBlockingDequeImpl<E> extends AbstractDType implements DBlockingDeq
   public boolean removeLastOccurrence(Object o) {
     byte[] arg = serialize(o);
     DTypeCollectionsFunction fn =
-        x -> ((DBlockingDequeImpl<E>) x).deque.removeLastOccurrence(deserialize(arg));
+        x -> ((DBlockingQueueImpl<E>) x).deque.removeLastOccurrence(deserialize(arg));
     return update(fn, CollectionsBackendFunction.ID);
   }
 
@@ -219,7 +219,7 @@ public class DBlockingDequeImpl<E> extends AbstractDType implements DBlockingDeq
   @SuppressWarnings("unchecked")
   public boolean add(E e) {
     byte[] arg = serialize(e);
-    DTypeCollectionsFunction fn = x -> ((DBlockingDequeImpl<E>) x).deque.add(deserialize(arg));
+    DTypeCollectionsFunction fn = x -> ((DBlockingQueueImpl<E>) x).deque.add(deserialize(arg));
     return update(fn, CollectionsBackendFunction.ID);
   }
 
@@ -227,7 +227,7 @@ public class DBlockingDequeImpl<E> extends AbstractDType implements DBlockingDeq
   @SuppressWarnings("unchecked")
   public boolean offer(E e) {
     byte[] arg = serialize(e);
-    DTypeCollectionsFunction fn = x -> ((DBlockingDequeImpl<E>) x).deque.offer(deserialize(arg));
+    DTypeCollectionsFunction fn = x -> ((DBlockingQueueImpl<E>) x).deque.offer(deserialize(arg));
     return update(fn, CollectionsBackendFunction.ID);
   }
 
@@ -236,7 +236,7 @@ public class DBlockingDequeImpl<E> extends AbstractDType implements DBlockingDeq
   public void put(E e) throws InterruptedException {
     byte[] arg = serialize(e);
     DTypeCollectionsFunction fn = x -> {
-      if (!((DBlockingDequeImpl<E>) x).deque.offerLast(deserialize(arg))) {
+      if (!((DBlockingQueueImpl<E>) x).deque.offerLast(deserialize(arg))) {
         throw new RetryableException(100);
       }
       return null;
@@ -252,7 +252,7 @@ public class DBlockingDequeImpl<E> extends AbstractDType implements DBlockingDeq
   @Override
   @SuppressWarnings("unchecked")
   public E remove() {
-    DTypeCollectionsFunction fn = x -> ((DBlockingDequeImpl<E>) x).deque.remove();
+    DTypeCollectionsFunction fn = x -> ((DBlockingQueueImpl<E>) x).deque.remove();
     return update(fn, CollectionsBackendFunction.ID);
   }
 
@@ -274,19 +274,19 @@ public class DBlockingDequeImpl<E> extends AbstractDType implements DBlockingDeq
 
   @Override
   public int remainingCapacity() {
-    DTypeCollectionsFunction fn = x -> ((DBlockingDequeImpl<?>) x).deque.remainingCapacity();
+    DTypeCollectionsFunction fn = x -> ((DBlockingQueueImpl<?>) x).deque.remainingCapacity();
     return query(fn, CollectionsBackendFunction.ID);
   }
 
   @Override
   public E element() {
-    DTypeCollectionsFunction fn = x -> ((DBlockingDequeImpl<?>) x).deque.element();
+    DTypeCollectionsFunction fn = x -> ((DBlockingQueueImpl<?>) x).deque.element();
     return query(fn, CollectionsBackendFunction.ID);
   }
 
   @Override
   public E peek() {
-    DTypeCollectionsFunction fn = x -> ((DBlockingDequeImpl<?>) x).deque.peek();
+    DTypeCollectionsFunction fn = x -> ((DBlockingQueueImpl<?>) x).deque.peek();
     return query(fn, CollectionsBackendFunction.ID);
   }
 
@@ -294,7 +294,7 @@ public class DBlockingDequeImpl<E> extends AbstractDType implements DBlockingDeq
   @SuppressWarnings("unchecked")
   public boolean remove(Object o) {
     byte[] arg = serialize(o);
-    DTypeCollectionsFunction fn = x -> ((DBlockingDequeImpl<E>) x).deque.remove(deserialize(arg));
+    DTypeCollectionsFunction fn = x -> ((DBlockingQueueImpl<E>) x).deque.remove(deserialize(arg));
     return update(fn, CollectionsBackendFunction.ID);
   }
 
@@ -302,7 +302,7 @@ public class DBlockingDequeImpl<E> extends AbstractDType implements DBlockingDeq
   public boolean containsAll(Collection<?> c) {
     byte[] arg = serialize(c);
     DTypeCollectionsFunction fn =
-        x -> ((DBlockingDequeImpl<?>) x).deque.containsAll(deserialize(arg));
+        x -> ((DBlockingQueueImpl<?>) x).deque.containsAll(deserialize(arg));
     return update(fn, CollectionsBackendFunction.ID);
   }
 
@@ -311,7 +311,7 @@ public class DBlockingDequeImpl<E> extends AbstractDType implements DBlockingDeq
   public boolean addAll(Collection<? extends E> c) {
     byte[] arg = serialize(c);
     DTypeCollectionsFunction fn =
-        x -> ((DBlockingDequeImpl<E>) x).deque.addAll(deserialize(arg));
+        x -> ((DBlockingQueueImpl<E>) x).deque.addAll(deserialize(arg));
     return update(fn, CollectionsBackendFunction.ID);
   }
 
@@ -319,7 +319,7 @@ public class DBlockingDequeImpl<E> extends AbstractDType implements DBlockingDeq
   public boolean removeAll(Collection<?> c) {
     byte[] arg = serialize(c);
     DTypeCollectionsFunction fn =
-        x -> ((DBlockingDequeImpl<?>) x).deque.removeAll(deserialize(arg));
+        x -> ((DBlockingQueueImpl<?>) x).deque.removeAll(deserialize(arg));
     return update(fn, CollectionsBackendFunction.ID);
   }
 
@@ -327,14 +327,14 @@ public class DBlockingDequeImpl<E> extends AbstractDType implements DBlockingDeq
   public boolean retainAll(Collection<?> c) {
     byte[] arg = serialize(c);
     DTypeCollectionsFunction fn =
-        x -> ((DBlockingDequeImpl<?>) x).deque.retainAll(deserialize(arg));
+        x -> ((DBlockingQueueImpl<?>) x).deque.retainAll(deserialize(arg));
     return update(fn, CollectionsBackendFunction.ID);
   }
 
   @Override
   public void clear() {
     DTypeCollectionsFunction fn = x -> {
-      ((DBlockingDequeImpl<?>) x).deque.clear();
+      ((DBlockingQueueImpl<?>) x).deque.clear();
       return null;
     };
     update(fn, CollectionsBackendFunction.ID);
@@ -344,7 +344,7 @@ public class DBlockingDequeImpl<E> extends AbstractDType implements DBlockingDeq
   public boolean contains(Object o) {
     byte[] arg = serialize(o);
     DTypeCollectionsFunction fn =
-        x -> ((DBlockingDequeImpl<?>) x).deque.contains(deserialize(arg));
+        x -> ((DBlockingQueueImpl<?>) x).deque.contains(deserialize(arg));
     return update(fn, CollectionsBackendFunction.ID);
   }
 
@@ -353,7 +353,7 @@ public class DBlockingDequeImpl<E> extends AbstractDType implements DBlockingDeq
   public int drainTo(Collection<? super E> c) {
     DTypeCollectionsFunction fn = x -> {
       Collection<? super E> result = new ArrayList<>();
-      ((DBlockingDequeImpl<E>) x).deque.drainTo(result);
+      ((DBlockingQueueImpl<E>) x).deque.drainTo(result);
       return result;
     };
     Collection<E> r = update(fn, CollectionsBackendFunction.ID);
@@ -366,7 +366,7 @@ public class DBlockingDequeImpl<E> extends AbstractDType implements DBlockingDeq
   public int drainTo(Collection<? super E> c, int maxElements) {
     DTypeCollectionsFunction fn = x -> {
       Collection<? super E> result = new ArrayList<>();
-      ((DBlockingDequeImpl<E>) x).deque.drainTo(result, maxElements);
+      ((DBlockingQueueImpl<E>) x).deque.drainTo(result, maxElements);
       return result;
     };
     Collection<E> r = update(fn, CollectionsBackendFunction.ID);
@@ -376,13 +376,13 @@ public class DBlockingDequeImpl<E> extends AbstractDType implements DBlockingDeq
 
   @Override
   public int size() {
-    DTypeCollectionsFunction fn = x -> ((DBlockingDequeImpl<?>) x).deque.size();
+    DTypeCollectionsFunction fn = x -> ((DBlockingQueueImpl<?>) x).deque.size();
     return query(fn, CollectionsBackendFunction.ID);
   }
 
   @Override
   public boolean isEmpty() {
-    DTypeCollectionsFunction fn = x -> ((DBlockingDequeImpl<?>) x).deque.isEmpty();
+    DTypeCollectionsFunction fn = x -> ((DBlockingQueueImpl<?>) x).deque.isEmpty();
     return query(fn, CollectionsBackendFunction.ID);
   }
 
@@ -425,13 +425,13 @@ public class DBlockingDequeImpl<E> extends AbstractDType implements DBlockingDeq
 
   @Override
   public Object[] toArray() {
-    DBlockingDequeImpl<E> entry = getEntry();
+    DBlockingQueueImpl<E> entry = getEntry();
     return entry.deque.toArray();
   }
 
   @Override
   public <T> T[] toArray(T[] a) {
-    DBlockingDequeImpl<E> entry = getEntry();
+    DBlockingQueueImpl<E> entry = getEntry();
     return entry.deque.toArray(a);
   }
 

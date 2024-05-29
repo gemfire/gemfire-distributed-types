@@ -33,7 +33,7 @@ public abstract class AbstractDBlockingQueueTest {
 
   @Test
   public void testAddFirst() {
-    DBlockingDeque<String> queue = getFactory().createDQueue(testName.getMethodName());
+    DBlockingQueue<String> queue = getFactory().createDQueue(testName.getMethodName());
     queue.addFirst("A");
     queue.addFirst("B");
     queue.addFirst("C");
@@ -44,7 +44,7 @@ public abstract class AbstractDBlockingQueueTest {
 
   @Test
   public void testAddLast() {
-    DBlockingDeque<String> queue = getFactory().createDQueue(testName.getMethodName());
+    DBlockingQueue<String> queue = getFactory().createDQueue(testName.getMethodName());
     queue.addLast("A");
     queue.addLast("B");
     queue.addLast("C");
@@ -55,7 +55,7 @@ public abstract class AbstractDBlockingQueueTest {
 
   @Test
   public void testOfferFirst() {
-    DBlockingDeque<String> queue = getFactory().createDQueue(testName.getMethodName(), 2);
+    DBlockingQueue<String> queue = getFactory().createDQueue(testName.getMethodName(), 2);
     queue.offerFirst("A");
     queue.offerFirst("B");
 
@@ -65,7 +65,7 @@ public abstract class AbstractDBlockingQueueTest {
 
   @Test
   public void testOfferLast() {
-    DBlockingDeque<String> queue = getFactory().createDQueue(testName.getMethodName(), 2);
+    DBlockingQueue<String> queue = getFactory().createDQueue(testName.getMethodName(), 2);
     queue.offerLast("A");
     queue.offerLast("B");
 
@@ -75,7 +75,7 @@ public abstract class AbstractDBlockingQueueTest {
 
   @Test
   public void testRemoveFirst() {
-    DBlockingDeque<String> queue = getFactory().createDQueue(testName.getMethodName());
+    DBlockingQueue<String> queue = getFactory().createDQueue(testName.getMethodName());
     queue.add("A");
     queue.add("B");
 
@@ -85,7 +85,7 @@ public abstract class AbstractDBlockingQueueTest {
 
   @Test
   public void testRemoveLast() {
-    DBlockingDeque<String> queue = getFactory().createDQueue(testName.getMethodName());
+    DBlockingQueue<String> queue = getFactory().createDQueue(testName.getMethodName());
     queue.add("A");
     queue.add("B");
 
@@ -95,7 +95,7 @@ public abstract class AbstractDBlockingQueueTest {
 
   @Test
   public void testPollFirst() {
-    DBlockingDeque<String> queue = getFactory().createDQueue(testName.getMethodName());
+    DBlockingQueue<String> queue = getFactory().createDQueue(testName.getMethodName());
     queue.add("A");
     queue.add("B");
 
@@ -106,7 +106,7 @@ public abstract class AbstractDBlockingQueueTest {
 
   @Test
   public void testPollLast() {
-    DBlockingDeque<String> queue = getFactory().createDQueue(testName.getMethodName());
+    DBlockingQueue<String> queue = getFactory().createDQueue(testName.getMethodName());
     queue.add("A");
     queue.add("B");
 
@@ -117,7 +117,7 @@ public abstract class AbstractDBlockingQueueTest {
 
   @Test
   public void testGetFirst() {
-    DBlockingDeque<String> queue = getFactory().createDQueue(testName.getMethodName());
+    DBlockingQueue<String> queue = getFactory().createDQueue(testName.getMethodName());
     queue.add("A");
     queue.add("B");
 
@@ -128,7 +128,7 @@ public abstract class AbstractDBlockingQueueTest {
 
   @Test
   public void testGetLast() {
-    DBlockingDeque<String> queue = getFactory().createDQueue(testName.getMethodName());
+    DBlockingQueue<String> queue = getFactory().createDQueue(testName.getMethodName());
     queue.add("A");
     queue.add("B");
 
@@ -139,7 +139,7 @@ public abstract class AbstractDBlockingQueueTest {
 
   @Test
   public void testPeekFirst() {
-    DBlockingDeque<String> queue = getFactory().createDQueue(testName.getMethodName());
+    DBlockingQueue<String> queue = getFactory().createDQueue(testName.getMethodName());
     queue.add("A");
     queue.add("B");
 
@@ -150,7 +150,7 @@ public abstract class AbstractDBlockingQueueTest {
 
   @Test
   public void testPeekLast() {
-    DBlockingDeque<String> queue = getFactory().createDQueue(testName.getMethodName());
+    DBlockingQueue<String> queue = getFactory().createDQueue(testName.getMethodName());
     queue.add("A");
     queue.add("B");
 
@@ -161,7 +161,7 @@ public abstract class AbstractDBlockingQueueTest {
 
   @Test
   public void testPutFirst() throws Exception {
-    DBlockingDeque<String> queue = getFactory().createDQueue(testName.getMethodName(), 1);
+    DBlockingQueue<String> queue = getFactory().createDQueue(testName.getMethodName(), 1);
     queue.add("A");
 
     Future<?> future = executor.submit(() -> queue.putFirst("B"));
@@ -173,7 +173,7 @@ public abstract class AbstractDBlockingQueueTest {
 
   @Test
   public void testPutLast() throws Exception {
-    DBlockingDeque<String> queue = getFactory().createDQueue(testName.getMethodName(), 1);
+    DBlockingQueue<String> queue = getFactory().createDQueue(testName.getMethodName(), 1);
     queue.add("A");
 
     Future<?> future = executor.submit(() -> queue.putLast("B"));
@@ -197,7 +197,7 @@ public abstract class AbstractDBlockingQueueTest {
 
   @Test
   public void testTakeFirst() throws Exception {
-    DBlockingDeque<String> queue = getFactory().createDQueue(testName.getMethodName());
+    DBlockingQueue<String> queue = getFactory().createDQueue(testName.getMethodName());
     queue.add("A");
     queue.add("B");
 
@@ -212,7 +212,7 @@ public abstract class AbstractDBlockingQueueTest {
 
   @Test
   public void testTakeLast() throws Exception {
-    DBlockingDeque<String> queue = getFactory().createDQueue(testName.getMethodName());
+    DBlockingQueue<String> queue = getFactory().createDQueue(testName.getMethodName());
     queue.add("A");
     queue.add("B");
 
@@ -239,7 +239,7 @@ public abstract class AbstractDBlockingQueueTest {
 
   @Test
   public void testRemoveFirstOccurrence() {
-    DBlockingDeque<String> queue = getFactory().createDQueue(testName.getMethodName());
+    DBlockingQueue<String> queue = getFactory().createDQueue(testName.getMethodName());
     queue.add("A");
     queue.add("B");
     queue.add("A");
@@ -251,7 +251,7 @@ public abstract class AbstractDBlockingQueueTest {
 
   @Test
   public void testRemoveLastOccurrence() {
-    DBlockingDeque<String> queue = getFactory().createDQueue(testName.getMethodName());
+    DBlockingQueue<String> queue = getFactory().createDQueue(testName.getMethodName());
     queue.add("A");
     queue.add("B");
     queue.add("A");
@@ -263,14 +263,14 @@ public abstract class AbstractDBlockingQueueTest {
 
   @Test
   public void testOffer() {
-    DBlockingDeque<String> queue = getFactory().createDQueue(testName.getMethodName(), 1);
+    DBlockingQueue<String> queue = getFactory().createDQueue(testName.getMethodName(), 1);
     assertThat(queue.offer("A")).isTrue();
     assertThat(queue.offer("B")).isFalse();
   }
 
   @Test
   public void testPut() throws Exception {
-    DBlockingDeque<String> queue = getFactory().createDQueue(testName.getMethodName(), 1);
+    DBlockingQueue<String> queue = getFactory().createDQueue(testName.getMethodName(), 1);
     queue.add("A");
 
     Future<Void> future = executor.submit(() -> queue.put("B"));
@@ -289,7 +289,7 @@ public abstract class AbstractDBlockingQueueTest {
 
   @Test
   public void testRemove() {
-    DBlockingDeque<String> queue = getFactory().createDQueue(testName.getMethodName());
+    DBlockingQueue<String> queue = getFactory().createDQueue(testName.getMethodName());
     queue.add("A");
     queue.add("B");
 
@@ -300,7 +300,7 @@ public abstract class AbstractDBlockingQueueTest {
 
   @Test
   public void testPoll() {
-    DBlockingDeque<String> queue = getFactory().createDQueue(testName.getMethodName());
+    DBlockingQueue<String> queue = getFactory().createDQueue(testName.getMethodName());
     queue.add("A");
     queue.add("B");
 
@@ -312,7 +312,7 @@ public abstract class AbstractDBlockingQueueTest {
   @Ignore
   @Test
   public void testTake() throws Exception {
-    DBlockingDeque<String> queue = getFactory().createDQueue(testName.getMethodName());
+    DBlockingQueue<String> queue = getFactory().createDQueue(testName.getMethodName());
     queue.add("A");
     queue.add("B");
 
@@ -333,7 +333,7 @@ public abstract class AbstractDBlockingQueueTest {
 
   @Test
   public void testRemainingCapacity() {
-    DBlockingDeque<String> queue = getFactory().createDQueue(testName.getMethodName(), 2);
+    DBlockingQueue<String> queue = getFactory().createDQueue(testName.getMethodName(), 2);
     assertThat(queue.remainingCapacity()).isEqualTo(2);
 
     queue.add("A");
@@ -345,7 +345,7 @@ public abstract class AbstractDBlockingQueueTest {
 
   @Test
   public void testElement() {
-    DBlockingDeque<String> queue = getFactory().createDQueue(testName.getMethodName());
+    DBlockingQueue<String> queue = getFactory().createDQueue(testName.getMethodName());
     queue.add("A");
     queue.add("B");
 
@@ -356,7 +356,7 @@ public abstract class AbstractDBlockingQueueTest {
 
   @Test
   public void testPeek() {
-    DBlockingDeque<String> queue = getFactory().createDQueue(testName.getMethodName());
+    DBlockingQueue<String> queue = getFactory().createDQueue(testName.getMethodName());
     queue.add("A");
     queue.add("B");
 
@@ -367,7 +367,7 @@ public abstract class AbstractDBlockingQueueTest {
 
   @Test
   public void testRemoveObject() {
-    DBlockingDeque<String> queue = getFactory().createDQueue(testName.getMethodName());
+    DBlockingQueue<String> queue = getFactory().createDQueue(testName.getMethodName());
     queue.add("A");
     queue.add("B");
     queue.add("C");
@@ -379,7 +379,7 @@ public abstract class AbstractDBlockingQueueTest {
 
   @Test
   public void testContainsAll() {
-    DBlockingDeque<String> queue = getFactory().createDQueue(testName.getMethodName());
+    DBlockingQueue<String> queue = getFactory().createDQueue(testName.getMethodName());
     queue.add("A");
     queue.add("B");
     queue.add("C");
@@ -391,7 +391,7 @@ public abstract class AbstractDBlockingQueueTest {
 
   @Test
   public void testAddAll() {
-    DBlockingDeque<String> queue = getFactory().createDQueue(testName.getMethodName(), 4);
+    DBlockingQueue<String> queue = getFactory().createDQueue(testName.getMethodName(), 4);
 
     assertThat(queue.addAll(Lists.list("A", "B", "C"))).isTrue();
     assertThat(queue.containsAll(Lists.list("C", "B", "A"))).isTrue();
@@ -404,7 +404,7 @@ public abstract class AbstractDBlockingQueueTest {
 
   @Test
   public void testRemoveAll() {
-    DBlockingDeque<String> queue = getFactory().createDQueue(testName.getMethodName());
+    DBlockingQueue<String> queue = getFactory().createDQueue(testName.getMethodName());
     queue.add("A");
     queue.add("B");
     queue.add("C");
@@ -418,7 +418,7 @@ public abstract class AbstractDBlockingQueueTest {
 
   @Test
   public void testRetainAll() {
-    DBlockingDeque<String> queue = getFactory().createDQueue(testName.getMethodName());
+    DBlockingQueue<String> queue = getFactory().createDQueue(testName.getMethodName());
     queue.add("A");
     queue.add("B");
     queue.add("C");
@@ -437,7 +437,7 @@ public abstract class AbstractDBlockingQueueTest {
 
   @Test
   public void testContains() {
-    DBlockingDeque<String> queue = getFactory().createDQueue(testName.getMethodName());
+    DBlockingQueue<String> queue = getFactory().createDQueue(testName.getMethodName());
     queue.add("A");
     queue.add("B");
 
@@ -447,7 +447,7 @@ public abstract class AbstractDBlockingQueueTest {
 
   @Test
   public void testDrainTo() {
-    DBlockingDeque<String> queue = getFactory().createDQueue(testName.getMethodName());
+    DBlockingQueue<String> queue = getFactory().createDQueue(testName.getMethodName());
     queue.add("A");
     queue.add("B");
     queue.add("C");
@@ -461,7 +461,7 @@ public abstract class AbstractDBlockingQueueTest {
 
   @Test
   public void testDrainToWithMaxCapacity() {
-    DBlockingDeque<String> queue = getFactory().createDQueue(testName.getMethodName());
+    DBlockingQueue<String> queue = getFactory().createDQueue(testName.getMethodName());
     queue.add("A");
     queue.add("B");
     queue.add("C");
