@@ -3,10 +3,9 @@
  */
 
 plugins {
-  id 'java'
+  id 'java-library'
   id 'distribution'
   id 'maven-publish'
-  id 'java-library'
   id 'com.diffplug.spotless' version '6.13.0'
 }
 
@@ -74,13 +73,16 @@ publishing {
 
 configurations {
   distribution
+  implementation.extendsFrom(distribution)
 }
 
 dependencies {
   api('com.vmware.gemfire:gemfire-core:10.1.1')
-  api('com.vmware.gemfire:gemfire-logging:10.1.1')
-  api('com.vmware.gemfire:gemfire-log4j:10.1.1')
-  api('org.apache.commons:commons-collections4:4.4')
+
+  implementation('com.vmware.gemfire:gemfire-logging:10.1.1')
+  implementation('com.vmware.gemfire:gemfire-log4j:10.1.1')
+
+  distribution('org.apache.commons:commons-collections4:4.4')
 
   testImplementation('org.assertj:assertj-core:3.24.2')
   testImplementation('com.vmware.gemfire:gemfire-junit:10.1.1')
@@ -126,15 +128,6 @@ tasks.register("generateModuleXml") { task ->
 }
 
 distributions {
-  main {
-    distributionBaseName = distributionPrefix
-    contents {
-      into('lib') {
-        from(jar)
-        from(configurations.distribution)
-      }
-    }
-  }
   extension {
     distributionBaseName = distributionPrefix
     contents {
@@ -149,6 +142,14 @@ distributions {
       }
     }
   }
+}
+
+extensionDistZip {
+  eachFile { file ->
+    String path = file.relativePath
+    file.setPath(path.substring(path.indexOf("/")+1,path.length()))
+  }
+  archiveExtension.set("gfm")
 }
 
 spotless {
