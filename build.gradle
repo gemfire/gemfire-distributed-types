@@ -77,17 +77,14 @@ configurations {
 }
 
 dependencies {
-  api 'com.vmware.gemfire:gemfire-core:10.1.1'
-  api 'com.vmware.gemfire:gemfire-logging:10.1.1'
-  api 'com.vmware.gemfire:gemfire-log4j:10.1.1'
+  api('com.vmware.gemfire:gemfire-core:10.1.1')
+  api('com.vmware.gemfire:gemfire-logging:10.1.1')
+  api('com.vmware.gemfire:gemfire-log4j:10.1.1')
+  api('org.apache.commons:commons-collections4:4.4')
 
   testImplementation('org.assertj:assertj-core:3.24.2')
-  //  testImplementation 'com.vmware.gemfire:gemfire-core:10.0.1'
   testImplementation('com.vmware.gemfire:gemfire-junit:10.1.1')
   testImplementation('com.vmware.gemfire:gemfire-dunit:10.1.1')
-
-  //  testRuntimeOnly 'com.vmware.gemfire:gemfire-log4j:10.1.1'
-  //  testRuntimeOnly 'com.vmware.gemfire:gemfire-logging:10.1.1'
 }
 
 java {
