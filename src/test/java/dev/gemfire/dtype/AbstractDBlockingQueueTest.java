@@ -76,6 +76,9 @@ public abstract class AbstractDBlockingQueueTest {
   @Test
   public void testRemoveFirst() {
     DBlockingQueue<String> queue = getFactory().createDQueue(testName.getMethodName());
+
+    assertThatThrownBy(queue::removeFirst).isInstanceOf(NoSuchElementException.class);
+
     queue.add("A");
     queue.add("B");
 
@@ -123,7 +126,7 @@ public abstract class AbstractDBlockingQueueTest {
 
     assertThat(queue.getFirst()).contains("A");
     queue.clear();
-    assertThatThrownBy(() -> queue.getFirst()).isInstanceOf(NoSuchElementException.class);
+    assertThatThrownBy(queue::getFirst).isInstanceOf(NoSuchElementException.class);
   }
 
   @Test
@@ -134,7 +137,7 @@ public abstract class AbstractDBlockingQueueTest {
 
     assertThat(queue.getLast()).contains("B");
     queue.clear();
-    assertThatThrownBy(() -> queue.getLast()).isInstanceOf(NoSuchElementException.class);
+    assertThatThrownBy(queue::getLast).isInstanceOf(NoSuchElementException.class);
   }
 
   @Test
@@ -204,7 +207,7 @@ public abstract class AbstractDBlockingQueueTest {
     assertThat(queue.takeFirst()).isEqualTo("A");
 
     queue.remove();
-    Future<String> future = executor.submit(() -> queue.takeFirst());
+    Future<String> future = executor.submit(queue::takeFirst);
 
     queue.add("C");
     assertThat(future.get()).isEqualTo("C");
@@ -219,7 +222,7 @@ public abstract class AbstractDBlockingQueueTest {
     assertThat(queue.takeLast()).isEqualTo("B");
 
     queue.remove();
-    Future<String> future = executor.submit(() -> queue.takeLast());
+    Future<String> future = executor.submit(queue::takeLast);
 
     queue.add("C");
     assertThat(future.get()).isEqualTo("C");
@@ -295,7 +298,7 @@ public abstract class AbstractDBlockingQueueTest {
 
     assertThat(queue.remove()).isEqualTo("A");
     assertThat(queue.remove()).isEqualTo("B");
-    assertThatThrownBy(() -> queue.remove()).isInstanceOf(NoSuchElementException.class);
+    assertThatThrownBy(queue::remove).isInstanceOf(NoSuchElementException.class);
   }
 
   @Test
@@ -319,7 +322,7 @@ public abstract class AbstractDBlockingQueueTest {
     assertThat(queue.take()).isEqualTo("A");
 
     queue.remove();
-    Future<String> future = executor.submit(() -> queue.take());
+    Future<String> future = executor.submit(queue::take);
 
     queue.add("C");
     assertThat(future.get()).isEqualTo("C");
@@ -351,7 +354,7 @@ public abstract class AbstractDBlockingQueueTest {
 
     assertThat(queue.element()).isEqualTo("A");
     queue.clear();
-    assertThatThrownBy(() -> queue.element()).isInstanceOf(NoSuchElementException.class);
+    assertThatThrownBy(queue::element).isInstanceOf(NoSuchElementException.class);
   }
 
   @Test

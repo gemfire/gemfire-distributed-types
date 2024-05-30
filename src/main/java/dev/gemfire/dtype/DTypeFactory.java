@@ -8,6 +8,7 @@ import java.util.function.BiFunction;
 
 import dev.gemfire.dtype.internal.DAtomicLongImpl;
 import dev.gemfire.dtype.internal.DBlockingQueueImpl;
+import dev.gemfire.dtype.internal.DCircularQueueImpl;
 import dev.gemfire.dtype.internal.DListImpl;
 import dev.gemfire.dtype.internal.DSemaphoreImpl;
 import dev.gemfire.dtype.internal.DSetImpl;
@@ -98,6 +99,16 @@ public class DTypeFactory {
     DBlockingQueueImpl<E> value =
         (DBlockingQueueImpl<E>) region.computeIfAbsent(name,
             r -> new DBlockingQueueImpl<>(name, capacity));
+    value.initialize(region, operationPerformer);
+
+    return value;
+  }
+
+  @SuppressWarnings("unchecked")
+  public <E> DCircularQueue<E> createDCircularQueue(String name, int capacity) {
+    DCircularQueueImpl<E> value =
+        (DCircularQueueImpl<E>) region.computeIfAbsent(name,
+            r -> new DCircularQueueImpl<>(name, capacity));
     value.initialize(region, operationPerformer);
 
     return value;

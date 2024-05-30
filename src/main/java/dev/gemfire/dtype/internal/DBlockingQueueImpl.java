@@ -23,7 +23,7 @@ import org.apache.geode.DataSerializer;
 
 public class DBlockingQueueImpl<E> extends AbstractDType implements DBlockingQueue<E> {
 
-  private LinkedBlockingDeque<E> deque;
+  private transient LinkedBlockingDeque<E> deque;
   private int capacity;
   private transient ExecutorService executor;
 
