@@ -10,7 +10,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.logging.log4j.Logger;
+
 import org.apache.geode.distributed.DistributedMember;
+import org.apache.geode.distributed.internal.membership.api.MemberIdentifier;
+import org.apache.geode.logging.internal.log4j.api.LogService;
 import org.apache.geode.management.membership.ClientMembershipEvent;
 import org.apache.geode.management.membership.ClientMembershipListener;
 
@@ -22,6 +26,8 @@ import org.apache.geode.management.membership.ClientMembershipListener;
  * have acquired permits for.
  */
 public class DSemaphoreTracker implements ClientMembershipListener {
+
+  private static final Logger logger = LogService.getLogger();
 
   Map<String, Set<DSemaphoreBackend>> memberSemaphores = new ConcurrentHashMap<>();
 
@@ -57,12 +63,14 @@ public class DSemaphoreTracker implements ClientMembershipListener {
   }
 
   private void releaseAll(DistributedMember member) {
-    Set<DSemaphoreBackend> semaphores = memberSemaphores.remove(member.getUniqueId());
-    if (semaphores == null) {
+    Set<DSemaphoreBackend> semaphores =
+        memberSemaphores.remove(((MemberIdentifier) member).getUniqueTag());
+    if (semaphores == null || semaphores.isEmpty()) {
       return;
     }
 
-    semaphores.forEach(s -> s.releaseAll(member.getUniqueId()));
+    logger.info("Releasing {} semaphore(s) held by {}", semaphores.size(), member);
+    semaphores.forEach(s -> s.releaseAll(((MemberIdentifier) member).getUniqueTag()));
   }
 
 }

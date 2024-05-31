@@ -25,7 +25,7 @@ public class DListIntegrationTest {
   public static void setupClass() {
     server.startServer();
     factory = new DTypeFactory(server.getCache(),
-        (region, memberId) -> new IntegrationTestOperationPerformer());
+        (region, memberTag) -> new IntegrationTestOperationPerformer());
     list = factory.createDList("list");
   }
 

@@ -8,20 +8,20 @@ import java.io.Serializable;
 
 /**
  * Concrete implementation of a {@link DTypeFunctionContext} used to hold the calling client's
- * memberId and the {@link DSemaphoreTracker}
+ * memberTag and the {@link DSemaphoreTracker}
  */
 public class DSemaphoreFunctionContext implements DTypeFunctionContext, Serializable {
 
-  private final String memberId;
+  private final String memberTag;
   private final DSemaphoreTracker tracker;
 
-  public DSemaphoreFunctionContext(String memberId, DSemaphoreTracker tracker) {
-    this.memberId = memberId;
+  public DSemaphoreFunctionContext(String memberTag, DSemaphoreTracker tracker) {
+    this.memberTag = memberTag;
     this.tracker = tracker;
   }
 
-  public String getMemberId() {
-    return memberId;
+  public String getMemberTag() {
+    return memberTag;
   }
 
   public DSemaphoreTracker getTracker() {

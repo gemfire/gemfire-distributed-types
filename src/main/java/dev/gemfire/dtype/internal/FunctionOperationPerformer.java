@@ -20,18 +20,18 @@ import org.apache.geode.cache.execute.ResultCollector;
 public class FunctionOperationPerformer implements OperationPerformer {
 
   private final Region<String, Object> region;
-  private final String memberId;
+  private final String memberTag;
 
-  public FunctionOperationPerformer(Region<String, Object> region, String memberId) {
+  public FunctionOperationPerformer(Region<String, Object> region, String memberTag) {
     this.region = region;
-    this.memberId = memberId;
+    this.memberTag = memberTag;
   }
 
   @Override
   @SuppressWarnings("unchecked")
   public <T> T performOperation(DType entry, DTypeFunction fn, boolean isUpdate,
       String gemfireFunctionId) {
-    Object[] args = new Object[] {entry.getName(), memberId, fn, isUpdate};
+    Object[] args = new Object[] {entry.getName(), memberTag, fn, isUpdate};
     Set<String> filter = Collections.singleton(entry.getName());
 
     T result;

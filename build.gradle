@@ -79,6 +79,7 @@ configurations {
 dependencies {
   api('com.vmware.gemfire:gemfire-core:10.1.1')
 
+  implementation('com.vmware.gemfire:gemfire-membership:10.1.1')
   implementation('com.vmware.gemfire:gemfire-logging:10.1.1')
   implementation('com.vmware.gemfire:gemfire-log4j:10.1.1')
 

@@ -11,14 +11,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 import dev.gemfire.dtype.DTypeException;
+import org.apache.logging.log4j.Logger;
 
 import org.apache.geode.DataSerializer;
+import org.apache.geode.logging.internal.log4j.api.LogService;
 
 /**
  * This class is the backing class that corresponds to {@link DSemaphoreImpl}. All state is held
  * here.
  */
 public class DSemaphoreBackend extends AbstractDType {
+
+  private static final Logger logger = LogService.getLogger();
 
   private int permitsAvailable;
 
@@ -66,6 +70,10 @@ public class DSemaphoreBackend extends AbstractDType {
     while (!_acquire(context, permits)) {
       try {
         queueLength++;
+        if (logger.isDebugEnabled()) {
+          logger.debug("Waiting to acquire semaphore '{}' for member {}", getName(),
+              ((DSemaphoreFunctionContext) context).getMemberTag());
+        }
         this.wait();
       } catch (InterruptedException e) {
         throw new RuntimeException(e);
@@ -80,8 +88,12 @@ public class DSemaphoreBackend extends AbstractDType {
     DSemaphoreFunctionContext semContext = (DSemaphoreFunctionContext) context;
     if (permitsAvailable >= permits) {
       permitsAvailable -= permits;
-      permitHolders.compute(semContext.getMemberId(), (k, v) -> v == null ? 1 : v + permits);
-      semContext.getTracker().add(semContext.getMemberId(), this);
+      permitHolders.compute(semContext.getMemberTag(), (k, v) -> v == null ? 1 : v + permits);
+      semContext.getTracker().add(semContext.getMemberTag(), this);
+      if (logger.isDebugEnabled()) {
+        logger.debug("Acquired semaphore '{}' for member {}", getName(),
+            semContext.getMemberTag());
+      }
       return true;
     }
     return false;
@@ -95,11 +107,11 @@ public class DSemaphoreBackend extends AbstractDType {
     ensureUsable();
     DSemaphoreFunctionContext semContext = (DSemaphoreFunctionContext) context;
 
-    if (permitHolders.get(semContext.getMemberId()) == permits) {
-      permitHolders.remove(semContext.getMemberId());
-      semContext.getTracker().remove(semContext.getMemberId(), this);
+    if (permitHolders.get(semContext.getMemberTag()) == permits) {
+      permitHolders.remove(semContext.getMemberTag());
+      semContext.getTracker().remove(semContext.getMemberTag(), this);
     } else {
-      permitHolders.compute(semContext.getMemberId(), (k, v) -> v - permits);
+      permitHolders.compute(semContext.getMemberTag(), (k, v) -> v - permits);
     }
     permitsAvailable += permits;
 
@@ -119,8 +131,8 @@ public class DSemaphoreBackend extends AbstractDType {
 
     int permitsReturned = permitsAvailable;
     permitsAvailable = 0;
-    permitHolders.compute(semContext.getMemberId(), (k, v) -> v == null ? 1 : v + permitsReturned);
-    semContext.getTracker().add(semContext.getMemberId(), this);
+    permitHolders.compute(semContext.getMemberTag(), (k, v) -> v == null ? 1 : v + permitsReturned);
+    semContext.getTracker().add(semContext.getMemberTag(), this);
 
     return permitsReturned;
   }
@@ -128,15 +140,15 @@ public class DSemaphoreBackend extends AbstractDType {
   public synchronized void destroy(DTypeFunctionContext context) {
     ensureUsable();
     DSemaphoreFunctionContext semContext = (DSemaphoreFunctionContext) context;
-    semContext.getTracker().remove(semContext.getMemberId(), this);
+    semContext.getTracker().remove(semContext.getMemberTag(), this);
 
     isDestroyed = true;
 
     this.notifyAll();
   }
 
-  synchronized void releaseAll(String memberId) {
-    Integer permits = permitHolders.remove(memberId);
+  synchronized void releaseAll(String memberTag) {
+    Integer permits = permitHolders.remove(memberTag);
     if (permits != null) {
       permitsAvailable += permits;
       this.notifyAll();

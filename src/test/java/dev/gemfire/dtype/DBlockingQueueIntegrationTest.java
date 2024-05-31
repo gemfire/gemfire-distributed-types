@@ -20,7 +20,7 @@ public class DBlockingQueueIntegrationTest extends AbstractDBlockingQueueTest {
   public static void setupClass() {
     server.startServer();
     factory = new DTypeFactory(server.getCache(),
-        (region, memberId) -> new IntegrationTestOperationPerformer());
+        (region, memberTag) -> new IntegrationTestOperationPerformer());
   }
 
   DTypeFactory getFactory() {

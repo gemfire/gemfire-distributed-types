@@ -18,11 +18,12 @@ import dev.gemfire.dtype.internal.OperationPerformer;
 import org.apache.geode.cache.GemFireCache;
 import org.apache.geode.cache.Region;
 import org.apache.geode.cache.client.ClientRegionShortcut;
+import org.apache.geode.distributed.internal.membership.api.MemberIdentifier;
 import org.apache.geode.internal.cache.GemFireCacheImpl;
 
 public class DTypeFactory {
 
-  public static final String DTYPES_REGION = "DTYPES";
+  public static final String DTYPES_REGION = System.getProperty("gemfire.dtype.region", "DTYPES");
 
   private GemFireCacheImpl cache;
   private Region<String, Object> region;
@@ -43,8 +44,9 @@ public class DTypeFactory {
       region = this.cache.getRegion(DTYPES_REGION);
     }
 
-    String memberId = this.cache.getDistributedSystem().getDistributedMember().getUniqueId();
-    this.operationPerformer = performerFunctionFactory.apply(region, memberId);
+    String memberTag = ((MemberIdentifier) this.cache.getDistributedSystem().getDistributedMember())
+        .getUniqueTag();
+    this.operationPerformer = performerFunctionFactory.apply(region, memberTag);
   }
 
   public void destroy(String name) {

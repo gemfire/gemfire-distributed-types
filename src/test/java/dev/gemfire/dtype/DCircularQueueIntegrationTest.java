@@ -20,7 +20,7 @@ public class DCircularQueueIntegrationTest extends AbstractDCircularQueueTest {
   public static void setupClass() {
     server.startServer();
     factory = new DTypeFactory(server.getCache(),
-        (region, memberId) -> new IntegrationTestOperationPerformer());
+        (region, memberTag) -> new IntegrationTestOperationPerformer());
   }
 
   DTypeFactory getFactory() {

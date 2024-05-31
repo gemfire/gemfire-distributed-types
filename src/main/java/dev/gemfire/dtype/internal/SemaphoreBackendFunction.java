@@ -24,7 +24,7 @@ public class SemaphoreBackendFunction implements Function<Object> {
   public void execute(FunctionContext<Object> context) {
     Object[] args = (Object[]) context.getArguments();
     String name = (String) args[0];
-    String memberId = (String) args[1];
+    String memberTag = (String) args[1];
     DTypeContextualFunction fn = (DTypeContextualFunction) args[2];
     boolean isUpdate = (boolean) args[3];
 
@@ -40,7 +40,7 @@ public class SemaphoreBackendFunction implements Function<Object> {
     Object result;
     synchronized (entry) {
       try {
-        result = fn.apply(entry, new DSemaphoreFunctionContext(memberId, tracker));
+        result = fn.apply(entry, new DSemaphoreFunctionContext(memberTag, tracker));
         if (isUpdate) {
           region.put(name, entry);
         }
