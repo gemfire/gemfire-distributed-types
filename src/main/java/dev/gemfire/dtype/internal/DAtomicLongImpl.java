@@ -48,6 +48,18 @@ public class DAtomicLongImpl extends AbstractDType implements DAtomicLong {
   }
 
   @Override
+  public long getAndSet(long newValue) {
+    DTypeCollectionsFunction fn = x -> ((DAtomicLongImpl) x).value.getAndSet(newValue);
+    return update(fn, CollectionsBackendFunction.ID);
+  }
+
+  @Override
+  public long addAndGet(long delta) {
+    DTypeCollectionsFunction fn = x -> ((DAtomicLongImpl) x).value.addAndGet(delta);
+    return update(fn, CollectionsBackendFunction.ID);
+  }
+
+  @Override
   public boolean compareAndSet(long expect, long update) {
     DTypeCollectionsFunction fn = x -> ((DAtomicLongImpl) x).value.compareAndSet(expect, update);
     return update(fn, CollectionsBackendFunction.ID);

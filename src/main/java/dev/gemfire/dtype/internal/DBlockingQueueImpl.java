@@ -10,14 +10,17 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Spliterator;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import dev.gemfire.dtype.DBlockingQueue;
+import dev.gemfire.dtype.SerializablePredicate;
 
 import org.apache.geode.DataSerializer;
 
@@ -441,6 +444,12 @@ public class DBlockingQueueImpl<E> extends AbstractDType implements DBlockingQue
   }
 
   @Override
+  @SuppressWarnings("unchecked")
+  public void forEach(Consumer<? super E> action) {
+    ((DBlockingQueueImpl<E>) getEntry()).deque.forEach(action);
+  }
+
+  @Override
   public void push(E e) {
     addFirst(e);
   }
@@ -448,6 +457,19 @@ public class DBlockingQueueImpl<E> extends AbstractDType implements DBlockingQue
   @Override
   public E pop() {
     return removeFirst();
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public boolean removeIf(SerializablePredicate<? super E> filter) {
+    DTypeCollectionsFunction fn = x -> ((DBlockingQueueImpl<E>) x).deque.removeIf(filter);
+    return update(fn, CollectionsBackendFunction.ID);
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public Spliterator<E> spliterator() {
+    return ((DBlockingQueueImpl<E>) getEntry()).deque.spliterator();
   }
 
   @Override

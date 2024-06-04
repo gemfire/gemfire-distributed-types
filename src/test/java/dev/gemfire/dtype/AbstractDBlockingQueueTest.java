@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 import org.assertj.core.util.Lists;
 import org.junit.ClassRule;
@@ -474,6 +475,47 @@ public abstract class AbstractDBlockingQueueTest {
 
     assertThat(expected).containsExactly("A", "B");
     assertThat(queue.toArray()).containsExactly("C");
+  }
+
+  @Test
+  public void testForeach() {
+    DBlockingQueue<String> queue = getFactory().createDQueue(testName.getMethodName());
+    queue.add("A");
+    queue.add("B");
+    queue.add("C");
+
+    List<String> result = new ArrayList<>();
+    queue.forEach(x -> result.add(x));
+    assertThat(queue.toArray()).containsExactlyElementsOf(result);
+  }
+
+  @Test
+  public void testRemoveIf() {
+    DBlockingQueue<Movie> queue = getFactory().createDQueue(testName.getMethodName());
+    Movie rambo = new Movie("Rambo");
+    Movie predator = new Movie("Predator");
+    Movie aliens = new Movie("Aliens");
+    queue.add(rambo);
+    queue.add(predator);
+    queue.add(aliens);
+
+    queue.removeIf(x -> x.title.equals("Predator"));
+    assertThat(queue.toArray()).containsExactly(rambo, aliens);
+  }
+
+  @Test
+  public void testStreamAndSpliterator() {
+    DBlockingQueue<Movie> queue = getFactory().createDQueue(testName.getMethodName());
+    Movie rambo = new Movie("Rambo");
+    Movie predator = new Movie("Predator");
+    Movie aliens = new Movie("Aliens");
+    queue.add(rambo);
+    queue.add(predator);
+    queue.add(aliens);
+
+    // Implicitly tests spliterator
+    List<String> result = queue.stream().map(m -> m.title).collect(Collectors.toList());
+    assertThat(result).containsExactly("Rambo", "Predator", "Aliens");
   }
 
 }

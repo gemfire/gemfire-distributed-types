@@ -4,10 +4,13 @@
 
 package dev.gemfire.dtype.internal;
 
+import java.util.concurrent.Callable;
+
 import org.apache.geode.cache.Region;
 import org.apache.geode.cache.execute.Function;
 import org.apache.geode.cache.execute.FunctionContext;
 import org.apache.geode.cache.execute.RegionFunctionContext;
+import org.apache.geode.internal.cache.PartitionedRegion;
 
 public class SemaphoreBackendFunction implements Function<Object> {
 
@@ -37,13 +40,19 @@ public class SemaphoreBackendFunction implements Function<Object> {
       ((DSemaphoreBackend) entry).recoverTrackingIfNeeded(tracker);
     }
 
+    AbstractDType finalEntry = entry;
+    Callable<Object> wrappingFn = () -> {
+      Object innerResult = fn.apply(finalEntry, new DSemaphoreFunctionContext(memberTag, tracker));
+      if (isUpdate) {
+        region.put(name, finalEntry);
+      }
+      return innerResult;
+    };
+
     Object result;
     synchronized (entry) {
       try {
-        result = fn.apply(entry, new DSemaphoreFunctionContext(memberTag, tracker));
-        if (isUpdate) {
-          region.put(name, entry);
-        }
+        result = ((PartitionedRegion) region).computeWithPrimaryLocked(name, wrappingFn);
       } catch (Exception e) {
         throw new MarkerException(e);
       }

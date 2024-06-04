@@ -7,7 +7,9 @@ package dev.gemfire.dtype;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import org.junit.ClassRule;
@@ -213,6 +215,19 @@ public abstract class AbstractDCircularQueueTest {
 
     queue.clear();
     assertThat(queue.isEmpty()).isTrue();
+  }
+
+  @Test
+  public void testForeach() {
+    DCircularQueue<String> queue = getFactory().createDCircularQueue(testName.getMethodName(), 3);
+
+    queue.add("A");
+    queue.add("B");
+    queue.add("C");
+
+    List<String> result = new ArrayList<>();
+    queue.forEach(x -> result.add(x));
+    assertThat(queue.toArray()).containsExactlyElementsOf(result);
   }
 
 }
