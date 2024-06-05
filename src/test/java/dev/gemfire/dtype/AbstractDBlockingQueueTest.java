@@ -7,10 +7,12 @@ package dev.gemfire.dtype;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.Future;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.assertj.core.util.Lists;
@@ -499,7 +501,8 @@ public abstract class AbstractDBlockingQueueTest {
     queue.add(predator);
     queue.add(aliens);
 
-    queue.removeIf(x -> x.title.equals("Predator"));
+    queue.removeIf((Predicate<Movie> & Serializable) x -> x.title.equals("Predator"));
+
     assertThat(queue.toArray()).containsExactly(rambo, aliens);
   }
 

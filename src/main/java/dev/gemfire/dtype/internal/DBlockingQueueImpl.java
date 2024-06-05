@@ -18,9 +18,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import dev.gemfire.dtype.DBlockingQueue;
-import dev.gemfire.dtype.SerializablePredicate;
 
 import org.apache.geode.DataSerializer;
 
@@ -389,29 +389,6 @@ public class DBlockingQueueImpl<E> extends AbstractDType implements DBlockingQue
     return query(fn, CollectionsBackendFunction.ID);
   }
 
-  private class DelegatingQueueIterator implements Iterator<E> {
-    private Iterator<E> outer;
-
-    DelegatingQueueIterator(Iterator<E> outer) {
-      this.outer = outer;
-    }
-
-    @Override
-    public boolean hasNext() {
-      return outer.hasNext();
-    }
-
-    @Override
-    public E next() {
-      return outer.next();
-    }
-
-    @Override
-    public void remove() {
-      throw new UnsupportedOperationException();
-    }
-  }
-
   /**
    * {@inheritDoc}
    * <p>
@@ -422,8 +399,9 @@ public class DBlockingQueueImpl<E> extends AbstractDType implements DBlockingQue
    * {@code UnsupportedOperationException}.
    */
   @Override
+  @SuppressWarnings("unchecked")
   public Iterator<E> iterator() {
-    return null;
+    return new DelegatingQueueIterator<>(((DBlockingQueueImpl<E>) getEntry()).deque.iterator());
   }
 
   @Override
@@ -461,7 +439,7 @@ public class DBlockingQueueImpl<E> extends AbstractDType implements DBlockingQue
 
   @Override
   @SuppressWarnings("unchecked")
-  public boolean removeIf(SerializablePredicate<? super E> filter) {
+  public boolean removeIf(Predicate<? super E> filter) {
     DTypeCollectionsFunction fn = x -> ((DBlockingQueueImpl<E>) x).deque.removeIf(filter);
     return update(fn, CollectionsBackendFunction.ID);
   }
@@ -507,7 +485,7 @@ public class DBlockingQueueImpl<E> extends AbstractDType implements DBlockingQue
   /**
    * Return our executor, creating one lazily since not everyone will need one.
    *
-   * @return an Excutor used to process any APIs that are interruptible
+   * @return an Executor used to process any APIs that are interruptible
    */
   private synchronized ExecutorService getExecutor() {
     if (executor == null) {

@@ -17,10 +17,15 @@ import dev.gemfire.dtype.internal.OperationPerformer;
 
 import org.apache.geode.cache.GemFireCache;
 import org.apache.geode.cache.Region;
+import org.apache.geode.cache.client.ClientCache;
 import org.apache.geode.cache.client.ClientRegionShortcut;
 import org.apache.geode.distributed.internal.membership.api.MemberIdentifier;
 import org.apache.geode.internal.cache.GemFireCacheImpl;
 
+/**
+ * The {@code DTypeFactory} is the primary means to access and create distributed types. It
+ * requires supplying a {@link ClientCache} instance for initializing.
+ */
 public class DTypeFactory {
 
   public static final String DTYPES_REGION = System.getProperty("gemfire.dtype.region", "DTYPES");
@@ -29,11 +34,20 @@ public class DTypeFactory {
   private Region<String, Object> region;
   private OperationPerformer operationPerformer;
 
-  public DTypeFactory(GemFireCache cache) {
+  /**
+   * Instantiate a factory instance used to create specific distributed types.
+   *
+   * @param clientCache a {@link ClientCache} which is used to interact with the backend cluster
+   */
+  public DTypeFactory(ClientCache clientCache) {
+    this((GemFireCache) clientCache);
+  }
+
+  DTypeFactory(GemFireCache cache) {
     this(cache, FunctionOperationPerformer::new);
   }
 
-  public DTypeFactory(GemFireCache cache,
+  DTypeFactory(GemFireCache cache,
       BiFunction<Region<String, Object>, String, OperationPerformer> performerFunctionFactory) {
     this.cache = (GemFireCacheImpl) cache;
 

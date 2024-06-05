@@ -43,5 +43,12 @@
  * Note that iteration operations will serialize and retrieve the full structure to the client.
  * Iteration is not performed remotely on the server. Only {@code DList} supports removal of
  * elements when iterating.
+ * <p>
+ * Operations that take lambdas as arguments need to ensure that the lambda is also declared as
+ * Serializable. For example, the method {@code removeIf(Predicate)} could be used as:
+ * <pre>
+ *   // DSet&lt;Integer&gt; set = ....
+ *   set.removeIf((Predicate&lt;Integer&gt; &amp; Serializable) x -&gt; x % 2 == 0);
+ * </pre>
  */
 package dev.gemfire.dtype;

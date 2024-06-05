@@ -7,12 +7,18 @@ package dev.gemfire.dtype.internal;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Spliterator;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 
 import dev.gemfire.dtype.DList;
 
@@ -208,18 +214,62 @@ public class DListImpl<E> extends AbstractDType implements DList<E> {
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public ListIterator<E> listIterator() {
-    return null;
+    return ((DListImpl<E>) getEntry()).list.listIterator();
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public ListIterator<E> listIterator(int index) {
-    return null;
+    return ((DListImpl<E>) getEntry()).list.listIterator(index);
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public List<E> subList(int fromIndex, int toIndex) {
-    return Collections.emptyList();
+    DTypeCollectionsFunction fn =
+        x -> new ArrayList<>(((DListImpl<E>) x).list.subList(fromIndex, toIndex));
+    return query(fn, CollectionsBackendFunction.ID);
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public void replaceAll(UnaryOperator<E> operator) {
+    DTypeCollectionsFunction fn = x -> {
+      ((DListImpl<E>) x).list.replaceAll(operator);
+      return null;
+    };
+    update(fn, CollectionsBackendFunction.ID);
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public void sort(Comparator<? super E> comparator) {
+    DTypeCollectionsFunction fn =x -> {
+      ((DListImpl<E>) x).list.sort(comparator);
+      return null;
+    };
+    update(fn, CollectionsBackendFunction.ID);
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public Spliterator<E> spliterator() {
+    return ((DListImpl<E>) getEntry()).list.spliterator();
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public boolean removeIf(Predicate<? super E> filter) {
+    DTypeCollectionsFunction fn =x -> ((DListImpl<E>) x).list.removeIf(filter);
+    return update(fn, CollectionsBackendFunction.ID);
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public void forEach(Consumer<? super E> action) {
+    ((DListImpl<E>) getEntry()).list.forEach(action);
   }
 
   @Override

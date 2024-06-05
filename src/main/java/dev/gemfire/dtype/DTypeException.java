@@ -5,7 +5,7 @@
 package dev.gemfire.dtype;
 
 /**
- * General exception class for this package
+ * General exception class for distributed types
  */
 public class DTypeException extends RuntimeException {
 

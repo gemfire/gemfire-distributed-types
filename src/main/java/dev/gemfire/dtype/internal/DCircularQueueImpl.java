@@ -24,7 +24,7 @@ public class DCircularQueueImpl<E> extends AbstractDType implements DCircularQue
 
   public DCircularQueueImpl(String name, int capacity) {
     super(name);
-    queue = new CircularFifoQueue(capacity);
+    queue = new CircularFifoQueue<>(capacity);
     this.capacity = capacity;
   }
 
@@ -117,9 +117,19 @@ public class DCircularQueueImpl<E> extends AbstractDType implements DCircularQue
     return query(fn, CollectionsBackendFunction.ID);
   }
 
+  /**
+   * {@inheritDoc}
+   * <p>
+   * Note that iteration occurs on the client. As such, the entire structure will be serialized to
+   * the client and then discarded once iteration is complete.
+   * <p>
+   * {@code remove} operations are NOT supported for iteration over this structure and will throw an
+   * {@code UnsupportedOperationException}.
+   */
   @Override
+  @SuppressWarnings("unchecked")
   public Iterator<E> iterator() {
-    return null;
+    return new DelegatingQueueIterator<>(((DCircularQueueImpl<E>) getEntry()).queue.iterator());
   }
 
   @Override
@@ -141,7 +151,6 @@ public class DCircularQueueImpl<E> extends AbstractDType implements DCircularQue
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public boolean containsAll(Collection<?> c) {
     byte[] arg = serialize(c);
     DTypeCollectionsFunction fn =
@@ -150,7 +159,6 @@ public class DCircularQueueImpl<E> extends AbstractDType implements DCircularQue
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public boolean addAll(Collection<? extends E> c) {
     byte[] arg = serialize(c);
     DTypeCollectionsFunction fn = x -> ((DCircularQueueImpl<?>) x).queue.addAll(deserialize(arg));
@@ -158,7 +166,6 @@ public class DCircularQueueImpl<E> extends AbstractDType implements DCircularQue
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public boolean removeAll(Collection<?> c) {
     byte[] arg = serialize(c);
     DTypeCollectionsFunction fn =
@@ -167,7 +174,6 @@ public class DCircularQueueImpl<E> extends AbstractDType implements DCircularQue
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public boolean retainAll(Collection<?> c) {
     byte[] arg = serialize(c);
     DTypeCollectionsFunction fn =

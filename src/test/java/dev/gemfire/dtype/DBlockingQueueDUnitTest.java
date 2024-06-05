@@ -21,12 +21,11 @@ public class DBlockingQueueDUnitTest extends AbstractDBlockingQueueTest {
   @ClassRule
   public static ClusterStartupRule cluster = new ClusterStartupRule();
 
-  private static MemberVM locator;
   private static DTypeFactory factory;
 
   @BeforeClass
   public static void setup() {
-    locator = cluster.startLocatorVM(0);
+    MemberVM locator = cluster.startLocatorVM(0);
 
     Properties props = new Properties();
     props.setProperty(SERIALIZABLE_OBJECT_FILTER, "dev.gemfire.dtype.**");
