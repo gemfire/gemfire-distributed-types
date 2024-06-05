@@ -2,5 +2,6 @@
 .gradle/
 build/
 out/
+target/
 
 vm*pathing.jar

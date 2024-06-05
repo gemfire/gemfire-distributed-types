@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>dev.gemfire</groupId>
+  <artifactId>gemfire-distributed-types</artifactId>
+  <version>0.1.0</version>
+
+  <name>dev.gemfire:gemfire-distributed-types</name>
+  <description>Provide a collection of distributed types compatible with GemFire</description>
+  <url>https://github.com/gemfire/gemfire-distributed-types</url>
+  <licenses>
+    <license>
+      <name>The Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <name>Jens Deppe</name>
+      <email>jens.deppe@broadcom.com</email>
+      <organization>Broadcom Inc.</organization>
+      <organizationUrl>https://broadcom.com</organizationUrl>
+    </developer>
+  </developers>
+  <scm>
+    <connection>scm:git:git://github.com/gemfire/gemfire-distributed-types.git</connection>
+    <developerConnection>scm:git:ssh://github.com:gemfire/gemfire-distributed-types.git</developerConnection>
+    <url>https://github.com/gemfire/gemfire-distributed-types</url>
+  </scm>
+
+  <properties>
+    <maven.compiler.source>8</maven.compiler.source>
+    <maven.compiler.target>8</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+  <repositories>
+    <repository>
+      <id>gemfire-release-repo</id>
+      <url>https://commercial-repo.pivotal.io/data3/gemfire-release-repo/gemfire</url>
+    </repository>
+  </repositories>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-collections4</artifactId>
+      <version>4.4</version>
+    </dependency>
+    <dependency>
+      <groupId>com.vmware.gemfire</groupId>
+      <artifactId>gemfire-core</artifactId>
+      <version>10.1.1</version>
+    </dependency>
+    <dependency>
+      <groupId>com.vmware.gemfire</groupId>
+      <artifactId>gemfire-membership</artifactId>
+      <version>10.1.1</version>
+    </dependency>
+    <dependency>
+      <groupId>com.vmware.gemfire</groupId>
+      <artifactId>gemfire-logging</artifactId>
+      <version>10.1.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.vmware.gemfire</groupId>
+      <artifactId>gemfire-log4j</artifactId>
+      <version>10.1.1</version>
+      <scope>runtime</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.vmware.gemfire</groupId>
+      <artifactId>gemfire-dunit</artifactId>
+      <version>10.1.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <version>3.24.2</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-gpg-plugin</artifactId>
+        <version>3.2.4</version>
+        <executions>
+          <execution>
+            <id>sign-artifacts</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>sign</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.sonatype.central</groupId>
+        <artifactId>central-publishing-maven-plugin</artifactId>
+        <version>0.4.0</version>
+        <extensions>true</extensions>
+        <configuration>
+          <publishingServerId>central</publishingServerId>
+          <tokenAuth>false</tokenAuth>
+          <autoPublish>true</autoPublish>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>3.7.0</version>
+        <configuration>
+          <tags>
+            <tag>
+              <name>implNote</name>
+              <placement>a</placement>
+              <head>Implementation Note:</head>
+            </tag>
+          </tags>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>
