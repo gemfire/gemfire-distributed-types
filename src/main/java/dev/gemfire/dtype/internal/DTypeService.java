@@ -28,7 +28,10 @@ public class DTypeService implements CacheService {
   public boolean init(Cache cache) {
     this.cache = (InternalCache) cache;
 
-    if (this.cache.isClient() || this.cache.getDistributedSystem().getName().contains("locator")) {
+    int vmKind = ((InternalCache) cache).getInternalDistributedSystem()
+        .getDistributedMember().getVmKind();
+
+    if (this.cache.isClient() || vmKind == ClusterDistributionManager.LOCATOR_DM_TYPE) {
       return false;
     }
 
