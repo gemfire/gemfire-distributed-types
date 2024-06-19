@@ -74,8 +74,20 @@
     </dependency>
 
     <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.13.2</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>com.vmware.gemfire</groupId>
       <artifactId>gemfire-dunit</artifactId>
+      <version>10.1.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.vmware.gemfire</groupId>
+      <artifactId>gemfire-junit</artifactId>
       <version>10.1.1</version>
       <scope>test</scope>
     </dependency>
