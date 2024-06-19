@@ -5,15 +5,11 @@
 package dev.gemfire.dtype;
 
 import static org.apache.geode.distributed.ConfigurationProperties.SERIALIZABLE_OBJECT_FILTER;
-import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Iterator;
 import java.util.Properties;
-import java.util.UUID;
 
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
-import org.junit.Test;
 
 import org.apache.geode.cache.client.ClientCache;
 import org.apache.geode.cache.client.ClientCacheFactory;

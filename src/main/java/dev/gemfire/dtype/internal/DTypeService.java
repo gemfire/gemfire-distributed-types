@@ -11,6 +11,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.geode.cache.Cache;
 import org.apache.geode.cache.RegionShortcut;
 import org.apache.geode.cache.execute.FunctionService;
+import org.apache.geode.distributed.internal.ClusterDistributionManager;
 import org.apache.geode.internal.cache.CacheService;
 import org.apache.geode.internal.cache.InternalCache;
 import org.apache.geode.logging.internal.log4j.api.LogService;
