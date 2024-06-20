@@ -18,6 +18,9 @@ import org.apache.geode.DataSerializable;
  * Note that iteration methods will serialize the whole structure to the client and perform the
  * iteration locally. Iterators do not support {@code remove()} and will throw an
  * UnsupportedOperationException.
+ * <p>
+ * Note that methods that are interruptible can only be interrupted locally. There is no interrupt
+ * 'signal' that is passed to the server performing the actual operation.
  *
  * @param <E> the type of elements in this queue
  */

@@ -61,13 +61,24 @@ public abstract class AbstractDType implements Delta, DataSerializable, DType {
     deltaOperation = fn;
   }
 
-  public <T> T query(DTypeFunction fn, String gemfireFunctionId) {
+  protected <T> T query(DTypeFunction fn, String gemfireFunctionId) {
     return operationPerformer.performOperation(this, fn, false, gemfireFunctionId);
   }
 
-  public <T> T update(DTypeFunction fn, String gemfireFunctionId) {
-    T result = operationPerformer.performOperation(this, fn, true, gemfireFunctionId);
-    return result;
+  protected <T> T update(DTypeFunction fn, String gemfireFunctionId) {
+    return operationPerformer.performOperation(this, fn, true, gemfireFunctionId);
+  }
+
+  protected <T> T updateInterruptibly(DTypeCollectionsFunction fn, String functionId)
+      throws InterruptedException {
+    try {
+      return update(fn, functionId);
+    } catch (Exception ex) {
+      if (Thread.currentThread().isInterrupted()) {
+        throw new InterruptedException();
+      }
+      throw new RuntimeException(ex);
+    }
   }
 
   @Override

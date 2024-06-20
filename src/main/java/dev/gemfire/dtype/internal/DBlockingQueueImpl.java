@@ -11,10 +11,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Spliterator;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -28,7 +24,6 @@ public class DBlockingQueueImpl<E> extends AbstractDType implements DBlockingQue
 
   private transient LinkedBlockingDeque<E> deque;
   private int capacity;
-  private transient ExecutorService executor;
 
   public DBlockingQueueImpl() {}
 
@@ -145,8 +140,9 @@ public class DBlockingQueueImpl<E> extends AbstractDType implements DBlockingQue
   @Override
   @SuppressWarnings("unchecked")
   public void putLast(E e) throws InterruptedException {
+    byte[] arg = serialize(e);
     DTypeCollectionsFunction fn = x -> {
-      if (!((DBlockingQueueImpl<E>) x).deque.offerLast(e)) {
+      if (!((DBlockingQueueImpl<E>) x).deque.offerLast(deserialize(arg))) {
         throw new RetryableException(100);
       }
       return null;
@@ -155,13 +151,29 @@ public class DBlockingQueueImpl<E> extends AbstractDType implements DBlockingQue
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public boolean offerFirst(E e, long timeout, TimeUnit unit) throws InterruptedException {
-    throw new UnsupportedOperationException();
+    byte[] arg = serialize(e);
+    DTypeCollectionsFunction fn = x -> {
+      if (((DBlockingQueueImpl<E>) x).deque.offerFirst(deserialize(arg))) {
+        return true;
+      }
+      throw new RetryableException(100, timeout, unit, () -> false);
+    };
+    return updateInterruptibly(fn, CollectionsBackendFunction.ID);
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public boolean offerLast(E e, long timeout, TimeUnit unit) throws InterruptedException {
-    throw new UnsupportedOperationException();
+    byte[] arg = serialize(e);
+    DTypeCollectionsFunction fn = x -> {
+      if (((DBlockingQueueImpl<E>) x).deque.offerLast(deserialize(arg))) {
+        return true;
+      }
+      throw new RetryableException(100, timeout, unit, () -> false);
+    };
+    return updateInterruptibly(fn, CollectionsBackendFunction.ID);
   }
 
   @Override
@@ -191,13 +203,28 @@ public class DBlockingQueueImpl<E> extends AbstractDType implements DBlockingQue
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public E pollFirst(long timeout, TimeUnit unit) throws InterruptedException {
-    throw new UnsupportedOperationException();
+    DTypeCollectionsFunction fn = x -> {
+      E result = ((DBlockingQueueImpl<E>) x).deque.pollFirst();
+      if (result == null) {
+        throw new RetryableException(100, timeout, unit);
+      }
+      return result;
+    };
+    return updateInterruptibly(fn, CollectionsBackendFunction.ID);
   }
 
   @Override
   public E pollLast(long timeout, TimeUnit unit) throws InterruptedException {
-    throw new UnsupportedOperationException();
+    DTypeCollectionsFunction fn = x -> {
+      E result = ((DBlockingQueueImpl<E>) x).deque.pollLast();
+      if (result == null) {
+        throw new RetryableException(100, timeout, unit);
+      }
+      return result;
+    };
+    return updateInterruptibly(fn, CollectionsBackendFunction.ID);
   }
 
   @Override
@@ -248,8 +275,16 @@ public class DBlockingQueueImpl<E> extends AbstractDType implements DBlockingQue
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public boolean offer(E e, long timeout, TimeUnit unit) throws InterruptedException {
-    throw new UnsupportedOperationException();
+    byte[] arg = serialize(e);
+    DTypeCollectionsFunction fn = x -> {
+      if (((DBlockingQueueImpl<E>) x).deque.offer(deserialize(arg))) {
+        return true;
+      }
+      throw new RetryableException(100, timeout, unit, () -> false);
+    };
+    return updateInterruptibly(fn, CollectionsBackendFunction.ID);
   }
 
   @Override
@@ -271,8 +306,16 @@ public class DBlockingQueueImpl<E> extends AbstractDType implements DBlockingQue
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public E poll(long timeout, TimeUnit unit) throws InterruptedException {
-    throw new UnsupportedOperationException();
+    DTypeCollectionsFunction fn = x -> {
+      E result = ((DBlockingQueueImpl<E>) x).deque.poll();
+      if (result == null) {
+        throw new RetryableException(100, timeout, unit);
+      }
+      return result;
+    };
+    return updateInterruptibly(fn, CollectionsBackendFunction.ID);
   }
 
   @Override
@@ -472,25 +515,4 @@ public class DBlockingQueueImpl<E> extends AbstractDType implements DBlockingQue
     }
   }
 
-  private <R> R updateInterruptibly(DTypeCollectionsFunction fn, String functionId)
-      throws InterruptedException {
-    Future<R> future = getExecutor().submit(() -> update(fn, functionId));
-    try {
-      return future.get();
-    } catch (ExecutionException ex) {
-      throw new RuntimeException(ex);
-    }
-  }
-
-  /**
-   * Return our executor, creating one lazily since not everyone will need one.
-   *
-   * @return an Executor used to process any APIs that are interruptible
-   */
-  private synchronized ExecutorService getExecutor() {
-    if (executor == null) {
-      executor = Executors.newSingleThreadExecutor();
-    }
-    return executor;
-  }
 }

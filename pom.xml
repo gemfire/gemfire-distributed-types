@@ -35,6 +35,7 @@
     <maven.compiler.source>8</maven.compiler.source>
     <maven.compiler.target>8</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <gemfire.version>10.1.1</gemfire.version>
   </properties>
 
   <repositories>
@@ -53,23 +54,23 @@
     <dependency>
       <groupId>com.vmware.gemfire</groupId>
       <artifactId>gemfire-core</artifactId>
-      <version>10.1.1</version>
+      <version>${gemfire.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vmware.gemfire</groupId>
       <artifactId>gemfire-membership</artifactId>
-      <version>10.1.1</version>
+      <version>${gemfire.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vmware.gemfire</groupId>
       <artifactId>gemfire-logging</artifactId>
-      <version>10.1.1</version>
+      <version>${gemfire.version}</version>
     </dependency>
 
     <dependency>
       <groupId>com.vmware.gemfire</groupId>
       <artifactId>gemfire-log4j</artifactId>
-      <version>10.1.1</version>
+      <version>${gemfire.version}</version>
       <scope>runtime</scope>
     </dependency>
 
@@ -82,13 +83,13 @@
     <dependency>
       <groupId>com.vmware.gemfire</groupId>
       <artifactId>gemfire-dunit</artifactId>
-      <version>10.1.1</version>
+      <version>${gemfire.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.vmware.gemfire</groupId>
       <artifactId>gemfire-junit</artifactId>
-      <version>10.1.1</version>
+      <version>${gemfire.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>

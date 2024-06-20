@@ -11,13 +11,15 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.assertj.core.util.Lists;
 import org.junit.ClassRule;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
@@ -189,16 +191,32 @@ public abstract class AbstractDBlockingQueueTest {
     assertThat(queue.remainingCapacity()).isEqualTo(0);
   }
 
-  @Ignore
   @Test
   public void testOfferFirstWithTimeout() throws Exception {
-    // Not implemented yet
+    DBlockingQueue<String> queue = getFactory().createDQueue(testName.getMethodName(), 1);
+    queue.add("A");
+
+    assertThat(queue.offerFirst("A", 1, TimeUnit.MILLISECONDS)).isFalse();
+
+    Future<Boolean> future = executor.submit(() -> queue.offerFirst("A", 10, TimeUnit.SECONDS));
+
+    queue.remove();
+
+    assertThat(future.get()).isTrue();
   }
 
-  @Ignore
   @Test
-  public void testOfferLastWithTimeout() {
+  public void testOfferLastWithTimeout() throws Exception {
+    DBlockingQueue<String> queue = getFactory().createDQueue(testName.getMethodName(), 1);
+    queue.add("A");
 
+    assertThat(queue.offerLast("A", 1, TimeUnit.MILLISECONDS)).isFalse();
+
+    Future<Boolean> future = executor.submit(() -> queue.offerLast("A", 10, TimeUnit.SECONDS));
+
+    queue.remove();
+
+    assertThat(future.get()).isTrue();
   }
 
   @Test
@@ -231,16 +249,30 @@ public abstract class AbstractDBlockingQueueTest {
     assertThat(future.get()).isEqualTo("C");
   }
 
-  @Ignore
   @Test
-  public void testPollFirstWithTimeout() {
-    // Not implemented yet
+  public void testPollFirstWithTimeout() throws Exception {
+    DBlockingQueue<String> queue = getFactory().createDQueue(testName.getMethodName());
+
+    assertThat(queue.pollFirst(1, TimeUnit.MILLISECONDS)).isNull();
+
+    Future<Object> future = executor.submit(() -> queue.pollFirst(10, TimeUnit.SECONDS));
+
+    queue.add("A");
+
+    assertThat(future.get()).isEqualTo("A");
   }
 
-  @Ignore
   @Test
-  public void testPollLastWithTimeout() {
-    // Not implemented yet
+  public void testPollLastWithTimeout() throws Exception {
+    DBlockingQueue<String> queue = getFactory().createDQueue(testName.getMethodName());
+
+    assertThat(queue.pollLast(1, TimeUnit.MILLISECONDS)).isNull();
+
+    Future<Object> future = executor.submit(() -> queue.pollLast(10, TimeUnit.SECONDS));
+
+    queue.add("A");
+
+    assertThat(future.get()).isEqualTo("A");
   }
 
   @Test
@@ -287,10 +319,21 @@ public abstract class AbstractDBlockingQueueTest {
     assertThat(queue.remainingCapacity()).isEqualTo(0);
   }
 
-  @Ignore
   @Test
-  public void testOfferWithTimeout() {
-    // Not implemented yet
+  public void testOfferWithTimeout() throws Exception {
+    DBlockingQueue<String> queue = getFactory().createDQueue(testName.getMethodName(), 1);
+
+    assertThat(queue.offer("A", 1, TimeUnit.MILLISECONDS)).isTrue();
+
+    Future<Boolean> future = executor.submit(() -> queue.offer("B", 1, TimeUnit.MILLISECONDS));
+
+    assertThat(future.get()).isFalse();
+
+    Future<Boolean> future2 = executor.submit(() -> queue.offer("B", 5, TimeUnit.SECONDS));
+
+    queue.remove();
+
+    assertThat(future2.get()).isTrue();
   }
 
   @Test
@@ -315,7 +358,6 @@ public abstract class AbstractDBlockingQueueTest {
     assertThat(queue.poll()).isNull();
   }
 
-  @Ignore
   @Test
   public void testTake() throws Exception {
     DBlockingQueue<String> queue = getFactory().createDQueue(testName.getMethodName());
@@ -331,10 +373,33 @@ public abstract class AbstractDBlockingQueueTest {
     assertThat(future.get()).isEqualTo("C");
   }
 
-  @Ignore
   @Test
-  public void testPollWithTimeout() {
-    // Not implemented yet
+  public void testPollWithTimeout() throws Exception {
+    DBlockingQueue<String> queue = getFactory().createDQueue(testName.getMethodName());
+
+    Future<String> future = executor.submit(() -> queue.poll(10, TimeUnit.SECONDS));
+
+    queue.add("A");
+
+    assertThat(future.get()).isEqualTo("A");
+    assertThat(queue.poll(1, TimeUnit.MILLISECONDS)).isNull();
+
+    AtomicBoolean interrupted = new AtomicBoolean(false);
+    Future<String> future2 = executor.submit(() -> {
+      try {
+        return queue.poll(5, TimeUnit.SECONDS);
+      } catch (Exception exception) {
+        interrupted.set(Thread.currentThread().isInterrupted());
+        throw exception;
+      }
+    });
+    Thread.sleep(1000);
+    future2.cancel(true);
+
+    assertThatThrownBy(future2::get).isInstanceOf(CancellationException.class);
+    // This assertion relies on future changes in GemFire that set the interrupted flag
+    // correctly when a function execution thread is interrupted.
+//    assertThat(interrupted.get()).as("Thread state was not 'interrupted'").isTrue();
   }
 
   @Test

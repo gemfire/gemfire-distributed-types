@@ -42,6 +42,7 @@ public class CollectionsBackendFunction implements Function<Object> {
 
     Object result = null;
     int retrySleepTime;
+    long startTime = System.currentTimeMillis();
     do {
       retrySleepTime = 0;
       synchronized (entry) {
@@ -49,6 +50,11 @@ public class CollectionsBackendFunction implements Function<Object> {
           result = ((PartitionedRegion) region).computeWithPrimaryLocked(name, wrappingFn);
         } catch (RetryableException rex) {
           retrySleepTime = rex.getRetrySleepTime();
+          long elapsedTime = System.currentTimeMillis() - startTime;
+          if (elapsedTime > rex.getMaxTimeToRetryMs()) {
+            result = rex.getFailingResult();
+            break;
+          }
         } catch (Exception ex) {
           throw new MarkerException(ex);
         }

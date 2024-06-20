@@ -43,15 +43,17 @@ DCircularQueue circular = factory.createDCircularQueue("circular", 100);
 `DSet`s and `DList`s implement the standard Java `Set` and `List` interfaces respectively.
 
 `DBlockingQueue` implements Java's `BlockingDeque` interface and provides a double-ended queue which
-provides both head and tail semantics. The current release of Distributed Types does not yet
-implement any of the methods that allow for timeouts. This includes:
-- `offerFirst`
-- `offerLast`
-- `pollFirst`
-- `pollLast`
-- `offer`
-- `poll`
-However, the non-timeout versions of these methods are all supported.
+provides both head and tail semantics. Note that methods of this class that support timeouts, and
+are thus interruptible, can only be interrupted locally. The interrupt 'signal' is not passed on to
+the cluster member that is actually performing the operation. This may lead to unexpected results if
+not taken into account. For example, if we have a thread trying to take an entry:
+
+```java
+Object obj = queue.poll(10, TimeUnit.SECONDS);
+```
+If this thread is interrupted, the thread executing on the server will continue. If, before the
+timeout expires, another thread places an entry into the queue, the `poll`ing thread will retrieve
+it which may leave the queue in an unexpected state as far as the client is concerned. 
 
 `DCircularQueue` implements the `Queue` interface and provides a first-in first-out queue with a
 fixed size that replaces its oldest element if full.
