@@ -7,6 +7,9 @@ package dev.gemfire.dtype;
 import static org.apache.geode.distributed.ConfigurationProperties.SERIALIZABLE_OBJECT_FILTER;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import org.junit.BeforeClass;
@@ -82,4 +85,30 @@ public class DAtomicLongDUnitTest {
     assertThat(long4.get()).isEqualTo(50_000);
     assertThat(long5.get()).isEqualTo(50_000);
   }
+
+  @Test
+  public void testAtomicLongConcurrentUniqueness() {
+    DAtomicLong long1 = factory.createAtomicLong("long");
+    DAtomicLong long2 = factory.createAtomicLong("long");
+    DAtomicLong long3 = factory.createAtomicLong("long");
+    DAtomicLong long4 = factory.createAtomicLong("long");
+    DAtomicLong long5 = factory.createAtomicLong("long");
+    Map<Long, Long> map = Collections.synchronizedMap(new HashMap<>(50_000));
+
+    new ConcurrentLoopingThreads(10_000,
+        i -> map.compute(long1.getAndAdd(1), (k, v) -> (v == null) ? 1 : v + 1),
+        i -> map.compute(long2.getAndAdd(1), (k, v) -> (v == null) ? 1 : v + 1),
+        i -> map.compute(long3.getAndAdd(1), (k, v) -> (v == null) ? 1 : v + 1),
+        i -> map.compute(long4.getAndAdd(1), (k, v) -> (v == null) ? 1 : v + 1),
+        i -> map.compute(long5.getAndAdd(1), (k, v) -> (v == null) ? 1 : v + 1))
+            .run();
+
+    assertThat(map.size()).isEqualTo(50_000);
+    for (Map.Entry<Long, Long> entry : map.entrySet()) {
+      assertThat(entry.getValue())
+          .as("Entry for key " + entry.getKey() + " is not 1")
+          .isEqualTo(1);
+    }
+  }
+
 }
