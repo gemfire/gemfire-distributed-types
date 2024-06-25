@@ -126,8 +126,7 @@ public abstract class AbstractDCountDownLatchTest {
         i -> ref2.countDown(),
         i -> ref3.countDown(),
         i -> ref4.countDown(),
-        i -> ref5.countDown()
-    ).run();
+        i -> ref5.countDown()).run();
 
     assertThat(ref1.getCount()).isEqualTo(latches - (iterations * 5));
   }

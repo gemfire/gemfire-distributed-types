@@ -65,7 +65,8 @@ public abstract class AbstractDAtomicReferenceTest {
     Movie avatar = new Movie("Avatar");
     Movie aliens = new Movie("Aliens");
 
-    DAtomicReference<Movie> ref = getFactory().createDAtomicReference(testName.getMethodName(), avatar);
+    DAtomicReference<Movie> ref =
+        getFactory().createDAtomicReference(testName.getMethodName(), avatar);
     assertThat(ref.getAndSet(aliens)).isEqualTo(avatar);
 
     assertThat(ref.get()).isEqualTo(aliens);
@@ -76,7 +77,8 @@ public abstract class AbstractDAtomicReferenceTest {
     Movie avatar = new Movie("Avatar");
     Movie aliens = new Movie("Aliens");
 
-    DAtomicReference<Movie> ref = getFactory().createDAtomicReference(testName.getMethodName(), avatar);
+    DAtomicReference<Movie> ref =
+        getFactory().createDAtomicReference(testName.getMethodName(), avatar);
     ref.set(aliens);
 
     DAtomicReference<Movie> ref2 = getFactory().createDAtomicReference(testName.getMethodName());

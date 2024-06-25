@@ -245,7 +245,7 @@ public class DListImpl<E> extends AbstractDType implements DList<E> {
   @Override
   @SuppressWarnings("unchecked")
   public void sort(Comparator<? super E> comparator) {
-    DTypeCollectionsFunction fn =x -> {
+    DTypeCollectionsFunction fn = x -> {
       ((DListImpl<E>) x).list.sort(comparator);
       return null;
     };
@@ -261,7 +261,7 @@ public class DListImpl<E> extends AbstractDType implements DList<E> {
   @Override
   @SuppressWarnings("unchecked")
   public boolean removeIf(Predicate<? super E> filter) {
-    DTypeCollectionsFunction fn =x -> ((DListImpl<E>) x).list.removeIf(filter);
+    DTypeCollectionsFunction fn = x -> ((DListImpl<E>) x).list.removeIf(filter);
     return update(fn, CollectionsBackendFunction.ID);
   }
 

@@ -50,7 +50,7 @@ public class DTypeFactory {
   }
 
   DTypeFactory(GemFireCache cache,
-               BiFunction<Region<String, Object>, String, OperationPerformer> performerFunctionFactory) {
+      BiFunction<Region<String, Object>, String, OperationPerformer> performerFunctionFactory) {
     this.cache = (GemFireCacheImpl) cache;
 
     if (this.cache.isClient()) {

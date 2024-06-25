@@ -10,7 +10,8 @@ public interface DCountDownLatch {
   void await();
 
   /**
-   * Causes the current thread to wait until the latch has counted down to zero, unless the thread is interrupted, or the specified waiting time elapses.
+   * Causes the current thread to wait until the latch has counted down to zero, unless the thread
+   * is interrupted, or the specified waiting time elapses.
    */
   boolean await(long timeout, TimeUnit unit) throws InterruptedException;
 

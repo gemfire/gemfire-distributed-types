@@ -6,7 +6,6 @@ package dev.gemfire.dtype.internal;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -35,7 +34,7 @@ public class DSemaphoreBackendTest {
 
   @Test
   public void setPermits() {
-      DSemaphoreBackend semaphore = new DSemaphoreBackend(testName.getMethodName());
+    DSemaphoreBackend semaphore = new DSemaphoreBackend(testName.getMethodName());
     semaphore.setPermits(3);
 
     assertThat(semaphore.availablePermits()).isEqualTo(3);

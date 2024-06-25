@@ -399,7 +399,7 @@ public abstract class AbstractDBlockingQueueTest {
     assertThatThrownBy(future2::get).isInstanceOf(CancellationException.class);
     // This assertion relies on future changes in GemFire that set the interrupted flag
     // correctly when a function execution thread is interrupted.
-//    assertThat(interrupted.get()).as("Thread state was not 'interrupted'").isTrue();
+    // assertThat(interrupted.get()).as("Thread state was not 'interrupted'").isTrue();
   }
 
   @Test

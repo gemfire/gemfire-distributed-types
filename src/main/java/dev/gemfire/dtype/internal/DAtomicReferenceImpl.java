@@ -48,8 +48,8 @@ public class DAtomicReferenceImpl<V> extends AbstractDType implements DAtomicRef
   @Override
   @SuppressWarnings("unchecked")
   public boolean compareAndSet(V expect, V update) {
-    byte[] argExpect  = serialize(expect);
-    byte[] argUpdate  = serialize(update);
+    byte[] argExpect = serialize(expect);
+    byte[] argUpdate = serialize(update);
     DTypeCollectionsFunction fn = x -> {
       DAtomicReferenceImpl<V> atomicRef = (DAtomicReferenceImpl<V>) x;
       V realExpected = deserialize(argExpect);
