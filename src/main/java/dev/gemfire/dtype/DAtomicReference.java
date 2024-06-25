@@ -6,7 +6,7 @@ import java.util.function.UnaryOperator;
 /**
  * A distributed and highly-available implementation of {@code AtomicReference}s.
  */
-public interface DAtomicReference<V> {
+public interface DAtomicReference<V> extends DType {
 
   /**
    * Atomically updates the current value with the results of applying the given function to the

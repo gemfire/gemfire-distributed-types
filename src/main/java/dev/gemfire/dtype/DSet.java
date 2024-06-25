@@ -20,5 +20,5 @@ import org.apache.geode.DataSerializable;
  *
  * @param <E> the type of elements held in this set
  */
-public interface DSet<E> extends Set<E> {
+public interface DSet<E> extends Set<E>, DType {
 }

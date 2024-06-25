@@ -42,7 +42,7 @@ import java.util.concurrent.Semaphore;
  * subsequent calls to {@code createSemaphore}, even from different JVMs, will not adjust the
  * number of permits.
  */
-public interface DSemaphore {
+public interface DSemaphore extends DType {
 
   /**
    * Acquire a single permit. The caller will block until a permit becomes available. The order of

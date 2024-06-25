@@ -7,7 +7,7 @@ package dev.gemfire.dtype;
 /**
  * A distributed and highly-available implementation of {@code AtomicLong}s.
  */
-public interface DAtomicLong {
+public interface DAtomicLong extends DType {
 
   /**
    * Gets the current value.

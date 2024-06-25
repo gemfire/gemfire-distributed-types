@@ -24,6 +24,6 @@ import org.apache.geode.DataSerializable;
  *
  * @param <E> the type of elements in this queue
  */
-public interface DBlockingQueue<E> extends BlockingDeque<E> {
+public interface DBlockingQueue<E> extends BlockingDeque<E>, DType {
 
 }

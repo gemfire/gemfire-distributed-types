@@ -26,5 +26,5 @@ import org.apache.geode.DataSerializable;
  *
  * @param <E> the type of elements in this queue
  */
-public interface DCircularQueue<E> extends Queue<E> {
+public interface DCircularQueue<E> extends Queue<E>, DType {
 }
