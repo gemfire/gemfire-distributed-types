@@ -12,6 +12,12 @@ public interface DCountDownLatch {
   /**
    * Causes the current thread to wait until the latch has counted down to zero, unless the thread
    * is interrupted, or the specified waiting time elapses.
+   *
+   * @param timeout the maximum time to wait
+   * @param unit the time unit of the timeout argument
+   * @return true if the count reached zero and false if the waiting time elapsed before the count
+   *         reached zero
+   * @throws InterruptedException if the current thread is interrupted while waiting
    */
   boolean await(long timeout, TimeUnit unit) throws InterruptedException;
 
@@ -23,7 +29,7 @@ public interface DCountDownLatch {
   /**
    * Returns the current count.
    *
-   * @return
+   * @return the current count
    */
   long getCount();
 
@@ -51,7 +57,7 @@ public interface DCountDownLatch {
   /**
    * Returns a string identifying this latch, as well as its state.
    *
-   * @return
+   * @return atring representation of the latch
    */
   String toString();
 }

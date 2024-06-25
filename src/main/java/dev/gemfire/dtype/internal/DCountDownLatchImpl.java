@@ -10,9 +10,9 @@ import dev.gemfire.dtype.DTypeException;
 
 public class DCountDownLatchImpl extends AbstractDType implements DCountDownLatch {
 
-  private volatile long count;
+  private long count;
   private boolean isDestroyed = false;
-  private volatile int waiters = 0;
+  private int waiters = 0;
 
   public DCountDownLatchImpl() {
     // For serialization
@@ -129,7 +129,7 @@ public class DCountDownLatchImpl extends AbstractDType implements DCountDownLatc
 
   @Override
   public String toString() {
-    return super.toString();
+    return String.format("DCountDownLatchImpl{name=%s, count=%d}", getName(), count);
   }
 
   @Override
