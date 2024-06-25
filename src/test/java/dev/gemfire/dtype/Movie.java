@@ -9,9 +9,18 @@ import java.util.Objects;
 
 class Movie implements Serializable {
   final String title;
+  private int views;
 
   Movie(final String title) {
     this.title = title;
+  }
+
+  void incrementViews() {
+    views += 1;
+  }
+
+  int getViews() {
+    return views;
   }
 
   @Override
@@ -30,4 +39,13 @@ class Movie implements Serializable {
   public int hashCode() {
     return Objects.hashCode(title);
   }
+
+  @Override
+  public String toString() {
+    return "Movie{" +
+        "title='" + title + '\'' +
+        ", views=" + views +
+        '}';
+  }
+
 }

@@ -11,12 +11,13 @@ import dev.gemfire.dtype.internal.DTypeCollectionsFunction;
 import dev.gemfire.dtype.internal.DTypeFunction;
 import dev.gemfire.dtype.internal.MarkerException;
 import dev.gemfire.dtype.internal.OperationPerformer;
+import dev.gemfire.dtype.internal.OperationType;
 import dev.gemfire.dtype.internal.RetryableException;
 
 public class IntegrationTestOperationPerformer implements OperationPerformer {
 
   @Override
-  public <T> T performOperation(DType entry, DTypeFunction fn, boolean isUpdate,
+  public <T> T performOperation(DType entry, DTypeFunction fn, OperationType operationType,
       String gemfireFunctionId) {
 
     DTypeCollectionsFunction realFn = (DTypeCollectionsFunction) fn;
@@ -26,7 +27,11 @@ public class IntegrationTestOperationPerformer implements OperationPerformer {
     do {
       retrySleepTime = 0;
       try {
-        result = realFn.apply(entry);
+        // Need to synchronize here to support functions using wait() and notifyAll(). (Otherwise
+        // we'd get IllegalMonitorStateException.
+        synchronized (entry) {
+          result = realFn.apply(entry);
+        }
       } catch (RetryableException rex) {
         retrySleepTime = rex.getRetrySleepTime();
         long elapsedTime = System.currentTimeMillis() - startTime;

@@ -7,8 +7,10 @@ package dev.gemfire.dtype;
 import java.util.function.BiFunction;
 
 import dev.gemfire.dtype.internal.DAtomicLongImpl;
+import dev.gemfire.dtype.internal.DAtomicReferenceImpl;
 import dev.gemfire.dtype.internal.DBlockingQueueImpl;
 import dev.gemfire.dtype.internal.DCircularQueueImpl;
+import dev.gemfire.dtype.internal.DCountDownLatchImpl;
 import dev.gemfire.dtype.internal.DListImpl;
 import dev.gemfire.dtype.internal.DSemaphoreImpl;
 import dev.gemfire.dtype.internal.DSetImpl;
@@ -48,7 +50,7 @@ public class DTypeFactory {
   }
 
   DTypeFactory(GemFireCache cache,
-      BiFunction<Region<String, Object>, String, OperationPerformer> performerFunctionFactory) {
+               BiFunction<Region<String, Object>, String, OperationPerformer> performerFunctionFactory) {
     this.cache = (GemFireCacheImpl) cache;
 
     if (this.cache.isClient()) {
@@ -125,6 +127,30 @@ public class DTypeFactory {
     DCircularQueueImpl<E> value =
         (DCircularQueueImpl<E>) region.computeIfAbsent(name,
             r -> new DCircularQueueImpl<>(name, capacity));
+    value.initialize(region, operationPerformer);
+
+    return value;
+  }
+
+  @SuppressWarnings("unchecked")
+  public <V> DAtomicReference<V> createDAtomicReference(String name, V object) {
+    DAtomicReferenceImpl<V> value =
+        (DAtomicReferenceImpl<V>) region.computeIfAbsent(name,
+            r -> new DAtomicReferenceImpl<>(name, object));
+    value.initialize(region, operationPerformer);
+
+    return value;
+  }
+
+  @SuppressWarnings("unchecked")
+  public <V> DAtomicReference<V> createDAtomicReference(String name) {
+    return createDAtomicReference(name, null);
+  }
+
+  @SuppressWarnings("unchecked")
+  public DCountDownLatchImpl createDCountDownLatch(String name, int count) {
+    DCountDownLatchImpl value = (DCountDownLatchImpl) region.computeIfAbsent(name,
+        r -> new DCountDownLatchImpl(name, count));
     value.initialize(region, operationPerformer);
 
     return value;

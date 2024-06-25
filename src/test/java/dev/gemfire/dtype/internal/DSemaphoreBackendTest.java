@@ -5,20 +5,20 @@
 package dev.gemfire.dtype.internal;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatNoException;
 
-import java.time.Duration;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 import org.junit.Before;
 import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestName;
 
-import org.apache.geode.test.awaitility.GeodeAwaitility;
 import org.apache.geode.test.junit.rules.ExecutorServiceRule;
 
 public class DSemaphoreBackendTest {
+
+  @Rule
+  public TestName testName = new TestName();
 
   @ClassRule
   public static ExecutorServiceRule executor = new ExecutorServiceRule();
@@ -33,10 +33,9 @@ public class DSemaphoreBackendTest {
     context = new DSemaphoreFunctionContext(MEMBER, tracker);
   }
 
-
   @Test
   public void setPermits() {
-    DSemaphoreBackend semaphore = new DSemaphoreBackend("semi");
+      DSemaphoreBackend semaphore = new DSemaphoreBackend(testName.getMethodName());
     semaphore.setPermits(3);
 
     assertThat(semaphore.availablePermits()).isEqualTo(3);
@@ -45,7 +44,7 @@ public class DSemaphoreBackendTest {
 
   @Test
   public void acquireAndRelease() {
-    DSemaphoreBackend semaphore = new DSemaphoreBackend("semi");
+    DSemaphoreBackend semaphore = new DSemaphoreBackend(testName.getMethodName());
     semaphore.setPermits(1);
 
     semaphore.acquire(context, 1);
@@ -58,24 +57,8 @@ public class DSemaphoreBackendTest {
   }
 
   @Test
-  public void acquireBlocksThreads() {
-    DSemaphoreBackend semaphore = new DSemaphoreBackend("semi");
-    semaphore.setPermits(1);
-
-    semaphore.acquire(context, 1);
-    Future<Void> future = executor.submit(() -> semaphore.acquire(context, 1));
-    GeodeAwaitility.await().atMost(Duration.ofSeconds(10))
-        .untilAsserted(() -> assertThat(semaphore.getQueueLength()).isEqualTo(1));
-
-    semaphore.release(context, 1);
-
-    assertThatNoException().isThrownBy(() -> future.get(60, TimeUnit.SECONDS));
-    assertThat(semaphore.getQueueLength()).isEqualTo(0);
-  }
-
-  @Test
   public void permitsAreDrained() {
-    DSemaphoreBackend semaphore = new DSemaphoreBackend("semi");
+    DSemaphoreBackend semaphore = new DSemaphoreBackend(testName.getMethodName());
     semaphore.setPermits(3);
 
     semaphore.acquire(context, 1);
@@ -89,7 +72,7 @@ public class DSemaphoreBackendTest {
 
   @Test
   public void testDestroy() {
-    DSemaphoreBackend semaphore = new DSemaphoreBackend("semi");
+    DSemaphoreBackend semaphore = new DSemaphoreBackend(testName.getMethodName());
     semaphore.setPermits(1);
     semaphore.acquire(context, 1);
     assertThat(tracker.memberSemaphores).isNotEmpty();

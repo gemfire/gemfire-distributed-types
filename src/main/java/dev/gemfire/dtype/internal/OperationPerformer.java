@@ -11,6 +11,7 @@ import dev.gemfire.dtype.DType;
  */
 public interface OperationPerformer {
 
-  <T> T performOperation(DType entry, DTypeFunction fn, boolean isUpdate, String gemFireFunctionId);
+  <T> T performOperation(DType entry, DTypeFunction fn, OperationType operationType,
+                         String gemFireFunctionId);
 
 }

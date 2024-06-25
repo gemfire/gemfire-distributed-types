@@ -9,21 +9,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.time.Duration;
 import java.util.Properties;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import org.awaitility.Awaitility;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 
-import org.apache.geode.cache.Region;
 import org.apache.geode.cache.client.ClientCache;
 import org.apache.geode.cache.client.ClientCacheFactory;
-import org.apache.geode.cache.partition.PartitionRegionHelper;
-import org.apache.geode.distributed.DistributedMember;
-import org.apache.geode.internal.cache.InternalCache;
 import org.apache.geode.internal.util.concurrent.ConcurrentLoopingThreads;
 import org.apache.geode.test.awaitility.GeodeAwaitility;
 import org.apache.geode.test.dunit.rules.ClientVM;
@@ -41,7 +39,7 @@ public class DSemaphoreDUnitTest {
   @ClassRule
   public static ExecutorServiceRule executor = new ExecutorServiceRule();
 
-  private static Properties props = new Properties();
+  private static final Properties props = new Properties();
   private static MemberVM locator;
   private static MemberVM server1;
   private static MemberVM server2;
@@ -90,6 +88,9 @@ public class DSemaphoreDUnitTest {
     DSemaphore semaphore2 = factory.createDSemaphore(SEM_NAME, 1);
     Future<Void> future = executor.submit(() -> semaphore2.acquire());
 
+    Awaitility.await().atMost(Duration.ofSeconds(30))
+        .untilAsserted(() -> assertThat(semaphore2.getQueueLength()).isEqualTo(1));
+
     semaphore1.release();
 
     assertThatNoException().isThrownBy(() -> future.get(60, TimeUnit.SECONDS));
@@ -101,8 +102,7 @@ public class DSemaphoreDUnitTest {
     DSemaphore semaphore = factory.createDSemaphore(SEM_NAME, 1);
     semaphore.acquire();
 
-    MemberVM primary = getServerForKey(SEM_NAME, server1, server2);
-    assertThat(primary).as("Cannot find primary for key:" + SEM_NAME).isNotNull();
+    MemberVM primary = TestUtils.getServerForKey(SEM_NAME, server1, server2);
 
     primary.stop();
 
@@ -185,25 +185,6 @@ public class DSemaphoreDUnitTest {
   private void acquireRelease(DSemaphore semaphore) {
     semaphore.acquire();
     semaphore.release();
-  }
-
-  private MemberVM getServerForKey(String key, MemberVM... vms) {
-    for (MemberVM vm : vms) {
-      boolean foundMember = vm.invoke("Get primary for key:" + key, () -> {
-        InternalCache cache = ClusterStartupRule.getCache();
-        Region<String, Object> region = cache.getRegion(DTypeFactory.DTYPES_REGION);
-        DistributedMember m = PartitionRegionHelper.getPrimaryMemberForKey(region, key);
-
-        return m != null
-            ? cache.getDistributedSystem().getDistributedMember().getName().equals(m.getName())
-            : false;
-      });
-      if (foundMember) {
-        return vm;
-      }
-    }
-
-    return null;
   }
 
 }

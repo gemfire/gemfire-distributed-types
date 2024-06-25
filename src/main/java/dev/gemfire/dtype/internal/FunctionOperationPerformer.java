@@ -29,9 +29,9 @@ public class FunctionOperationPerformer implements OperationPerformer {
 
   @Override
   @SuppressWarnings("unchecked")
-  public <T> T performOperation(DType entry, DTypeFunction fn, boolean isUpdate,
+  public <T> T performOperation(DType entry, DTypeFunction fn, OperationType operationType,
       String gemfireFunctionId) {
-    Object[] args = new Object[] {entry.getName(), memberTag, fn, isUpdate};
+    Object[] args = new Object[] {entry.getName(), memberTag, fn, operationType};
     Set<String> filter = Collections.singleton(entry.getName());
 
     T result;

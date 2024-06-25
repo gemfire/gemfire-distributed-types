@@ -4,6 +4,8 @@
 
 package dev.gemfire.dtype.internal;
 
+import static dev.gemfire.dtype.internal.OperationType.*;
+
 import java.util.concurrent.Callable;
 
 import org.apache.geode.cache.Region;
@@ -23,19 +25,21 @@ public class CollectionsBackendFunction implements Function<Object> {
     String name = (String) args[0];
     String memberTag = (String) args[1];
     DTypeCollectionsFunction fn = (DTypeCollectionsFunction) args[2];
-    boolean isUpdate = (boolean) args[3];
+    OperationType operationType = (OperationType) args[3];
 
     Region<String, AbstractDType> region = ((RegionFunctionContext) context).getDataSet();
     AbstractDType entry = region.get(name);
 
     Callable<Object> wrappingFn = () -> {
       Object innerResult;
-      if (isUpdate) {
-        entry.setDelta(fn);
+      if (operationType == QUERY) {
+        innerResult = fn.apply(entry);
+      } else {
+        if (operationType == UPDATE) {
+          entry.setDelta(fn);
+        }
         innerResult = fn.apply(entry);
         region.put(name, entry);
-      } else {
-        innerResult = fn.apply(entry);
       }
       return innerResult;
     };
@@ -56,6 +60,9 @@ public class CollectionsBackendFunction implements Function<Object> {
             break;
           }
         } catch (Exception ex) {
+          if (ex instanceof MarkerException) {
+            throw (MarkerException) ex;
+          }
           throw new MarkerException(ex);
         }
       }

@@ -4,6 +4,8 @@
 
 package dev.gemfire.dtype.internal;
 
+import static dev.gemfire.dtype.internal.OperationType.UPDATE;
+
 import java.util.concurrent.Callable;
 
 import org.apache.geode.cache.Region;
@@ -29,7 +31,7 @@ public class SemaphoreBackendFunction implements Function<Object> {
     String name = (String) args[0];
     String memberTag = (String) args[1];
     DTypeContextualFunction fn = (DTypeContextualFunction) args[2];
-    boolean isUpdate = (boolean) args[3];
+    OperationType operationType = (OperationType) args[3];
 
     Region<String, AbstractDType> region = ((RegionFunctionContext) context).getDataSet();
     AbstractDType entry = region.get(name);
@@ -43,17 +45,20 @@ public class SemaphoreBackendFunction implements Function<Object> {
     AbstractDType finalEntry = entry;
     Callable<Object> wrappingFn = () -> {
       Object innerResult = fn.apply(finalEntry, new DSemaphoreFunctionContext(memberTag, tracker));
-      if (isUpdate) {
+      if (operationType == UPDATE) {
         region.put(name, finalEntry);
       }
       return innerResult;
     };
 
     Object result;
-    synchronized (entry) {
+    synchronized (finalEntry) {
       try {
         result = ((PartitionedRegion) region).computeWithPrimaryLocked(name, wrappingFn);
       } catch (Exception e) {
+        if (e instanceof MarkerException) {
+          throw (MarkerException) e;
+        }
         throw new MarkerException(e);
       }
     }

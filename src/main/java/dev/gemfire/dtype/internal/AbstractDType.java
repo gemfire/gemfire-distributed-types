@@ -4,6 +4,9 @@
 
 package dev.gemfire.dtype.internal;
 
+import static dev.gemfire.dtype.internal.OperationType.NO_DELTA_UPDATE;
+import static dev.gemfire.dtype.internal.OperationType.QUERY;
+import static dev.gemfire.dtype.internal.OperationType.UPDATE;
 import static org.apache.geode.util.internal.UncheckedUtils.uncheckedCast;
 
 import java.io.DataInput;
@@ -62,17 +65,33 @@ public abstract class AbstractDType implements Delta, DataSerializable, DType {
   }
 
   protected <T> T query(DTypeFunction fn, String gemfireFunctionId) {
-    return operationPerformer.performOperation(this, fn, false, gemfireFunctionId);
+    return operationPerformer.performOperation(this, fn, QUERY, gemfireFunctionId);
   }
 
   protected <T> T update(DTypeFunction fn, String gemfireFunctionId) {
-    return operationPerformer.performOperation(this, fn, true, gemfireFunctionId);
+    return operationPerformer.performOperation(this, fn, UPDATE, gemfireFunctionId);
   }
 
   protected <T> T updateInterruptibly(DTypeCollectionsFunction fn, String functionId)
       throws InterruptedException {
     try {
       return update(fn, functionId);
+    } catch (Exception ex) {
+      if (Thread.currentThread().isInterrupted()) {
+        throw new InterruptedException();
+      }
+      throw new RuntimeException(ex);
+    }
+  }
+
+  protected <T> T noDeltaUpdate(DTypeFunction fn, String gemfireFunctionId) {
+    return operationPerformer.performOperation(this, fn, NO_DELTA_UPDATE, gemfireFunctionId);
+  }
+
+  protected <T> T noDeltaUpdateInterruptibly(DTypeCollectionsFunction fn, String functionId)
+      throws InterruptedException {
+    try {
+      return noDeltaUpdate(fn, functionId);
     } catch (Exception ex) {
       if (Thread.currentThread().isInterrupted()) {
         throw new InterruptedException();

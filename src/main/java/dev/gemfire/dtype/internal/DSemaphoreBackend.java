@@ -66,7 +66,7 @@ public class DSemaphoreBackend extends AbstractDType {
     return queueLength;
   }
 
-  public synchronized void acquire(DTypeFunctionContext context, int permits) {
+  public void acquire(DTypeFunctionContext context, int permits) {
     while (!_acquire(context, permits)) {
       try {
         queueLength++;
@@ -76,7 +76,7 @@ public class DSemaphoreBackend extends AbstractDType {
         }
         this.wait();
       } catch (InterruptedException e) {
-        throw new RuntimeException(e);
+        throw new MarkerException(e);
       } finally {
         queueLength--;
       }
@@ -115,7 +115,7 @@ public class DSemaphoreBackend extends AbstractDType {
     }
     permitsAvailable += permits;
 
-    this.notifyAll();
+    notifyAll();
   }
 
   public int availablePermits() {
@@ -144,14 +144,14 @@ public class DSemaphoreBackend extends AbstractDType {
 
     isDestroyed = true;
 
-    this.notifyAll();
+    notifyAll();
   }
 
   synchronized void releaseAll(String memberTag) {
     Integer permits = permitHolders.remove(memberTag);
     if (permits != null) {
       permitsAvailable += permits;
-      this.notifyAll();
+      notifyAll();
     }
   }
 
@@ -177,7 +177,7 @@ public class DSemaphoreBackend extends AbstractDType {
   }
 
   @Override
-  public void toData(DataOutput out) throws IOException {
+  public synchronized void toData(DataOutput out) throws IOException {
     super.toData(out);
     DataSerializer.writePrimitiveBoolean(isInitialized, out);
     DataSerializer.writePrimitiveInt(permitsAvailable, out);
