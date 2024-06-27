@@ -27,14 +27,16 @@ import org.apache.geode.internal.cache.GemFireCacheImpl;
 /**
  * The {@code DTypeFactory} is the primary means to access and create distributed types. It
  * requires supplying a {@link ClientCache} instance for initializing.
+ * <p>
+ * Instances are created or retrieved if a named type already exists. Thus, the same call can be
+ * used by different clients, but only one backend instance will be created as necessary.
  */
 public class DTypeFactory {
 
   public static final String DTYPES_REGION = System.getProperty("gemfire.dtype.region", "DTYPES");
 
-  private GemFireCacheImpl cache;
-  private Region<String, Object> region;
-  private OperationPerformer operationPerformer;
+  private final Region<String, Object> region;
+  private final OperationPerformer operationPerformer;
 
   /**
    * Instantiate a factory instance used to create specific distributed types.
@@ -51,16 +53,16 @@ public class DTypeFactory {
 
   DTypeFactory(GemFireCache cache,
       BiFunction<Region<String, Object>, String, OperationPerformer> performerFunctionFactory) {
-    this.cache = (GemFireCacheImpl) cache;
+    GemFireCacheImpl cacheImpl = (GemFireCacheImpl) cache;
 
-    if (this.cache.isClient()) {
-      region = this.cache.<String, Object>createClientRegionFactory(ClientRegionShortcut.PROXY)
+    if (cacheImpl.isClient()) {
+      region = cacheImpl.<String, Object>createClientRegionFactory(ClientRegionShortcut.PROXY)
           .create(DTYPES_REGION);
     } else {
-      region = this.cache.getRegion(DTYPES_REGION);
+      region = cacheImpl.getRegion(DTYPES_REGION);
     }
 
-    String memberTag = ((MemberIdentifier) this.cache.getDistributedSystem().getDistributedMember())
+    String memberTag = ((MemberIdentifier) cacheImpl.getDistributedSystem().getDistributedMember())
         .getUniqueTag();
     this.operationPerformer = performerFunctionFactory.apply(region, memberTag);
   }
@@ -142,12 +144,10 @@ public class DTypeFactory {
     return value;
   }
 
-  @SuppressWarnings("unchecked")
   public <V> DAtomicReference<V> createDAtomicReference(String name) {
     return createDAtomicReference(name, null);
   }
 
-  @SuppressWarnings("unchecked")
   public DCountDownLatchImpl createDCountDownLatch(String name, int count) {
     DCountDownLatchImpl value = (DCountDownLatchImpl) region.computeIfAbsent(name,
         r -> new DCountDownLatchImpl(name, count));

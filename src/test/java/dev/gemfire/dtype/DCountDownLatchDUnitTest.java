@@ -6,8 +6,11 @@ package dev.gemfire.dtype;
 
 import static org.apache.geode.distributed.ConfigurationProperties.SERIALIZABLE_OBJECT_FILTER;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 
 import java.util.Properties;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -69,4 +72,29 @@ public class DCountDownLatchDUnitTest extends AbstractDCountDownLatchTest {
       server2 = cluster.startServerVM(2, props, locator.getPort());
     }
   }
+
+  @Test
+  public void testServerRestartRetriesExistingAwait() throws Exception {
+    String latch = testName.getMethodName();
+    DCountDownLatch ref1 = getFactory().createDCountDownLatch(latch, 1);
+    DCountDownLatch ref2 = getFactory().createDCountDownLatch(latch, 1);
+
+    MemberVM primary = TestUtils.getServerForKey(latch, server1, server2);
+
+    Future<Void> future = executor.submit(() -> ref1.await());
+
+    primary.stop();
+
+    if (primary.equals(server1)) {
+      server1 = cluster.startServerVM(1, props, locator.getPort());
+    } else {
+      server2 = cluster.startServerVM(2, props, locator.getPort());
+    }
+
+    assertThat(ref2.getCount()).isEqualTo(1);
+    ref2.countDown();
+
+    assertThatNoException().isThrownBy(() -> future.get(2, TimeUnit.SECONDS));
+  }
+
 }

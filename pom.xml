@@ -139,9 +139,6 @@
             <goals>
               <goal>jar</goal>
             </goals>
-<!--            <configuration>-->
-<!--              <failOnWarnings>true</failOnWarnings>-->
-<!--            </configuration>-->
           </execution>
         </executions>
         <configuration>

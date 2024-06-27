@@ -16,6 +16,9 @@
  * <li>{@link dev.gemfire.dtype.DCircularQueue}</li>
  * <li>{@link dev.gemfire.dtype.DAtomicLong}</li>
  * <li>{@link dev.gemfire.dtype.DSemaphore}</li>
+ * <li>{@link dev.gemfire.dtype.DAtomicReference}</li>
+ * <li>{@link dev.gemfire.dtype.DCountDownLatch}</li>
+ * <li>{@link dev.gemfire.dtype.DSnowflake}</li>
  * </ul>
  * <p>
  * Distributed Type instances are created with a {@link dev.gemfire.dtype.DTypeFactory}. For

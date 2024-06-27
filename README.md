@@ -18,11 +18,17 @@ access.
 ### Concurrency types
 
 - DAtomicLong
+- DAtomicReference
 - DSemaphore
+- DCountDownLatch
 
+### Other
+
+- DSnowflake
+- 
 ### Examples
 
-All the types are created using a `DTypeFactory`:
+Almost all the types are created using a `DTypeFactory`:
 
 ```java
 ClientCache client = new ClientCacheFactory()
@@ -37,6 +43,8 @@ DSemaphore semaphore = factory.createDSemaphore("semaphore", 1);
 DBlockingQueue queue = factory.createDQueue("queue", 5);
 DCircularQueue circular = factory.createDCircularQueue("circular", 100);
 ```
+
+(`DSnowflake`s are simply created with regular Java instantiation)
 
 ### Details
 
@@ -64,6 +72,18 @@ different JVMs. Since DSemaphores are highly available, they maintain their stat
 servers crash and clients re-connect to different servers.
 
 `DAtomicLong` provides a counter implementation similar to Java's `AtomicLong` class.
+
+`DAtomicReference` provides an implementation similar to Java's `AtomicReference` class. One
+difference to note is that the `compareAndSet` method does not compare on object identity, but
+rather on object equality. This is because the identity on the client will obviously be different to
+the identity on the server, where the operation is actually being performed. Hence the need to use
+equality as a way to compare objects.
+
+`DCountDownLatch` provides an implementation similar to Java's `CountDownLatch`.
+
+Note that any methods which can wait (and block) will automatically be retried if the server they
+are connected to crashes or stops. If the particular method semantics also provide a timeout, the
+timeout will be restarted.
 
 ### Developing and Deploying
 
