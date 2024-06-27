@@ -20,6 +20,24 @@ public class DCircularQueueImpl<E> extends AbstractDType implements DCircularQue
   private transient CircularFifoQueue<E> queue;
   private int capacity;
 
+  // A few lambdas that can be static since they don't need to capture any values.
+  private static final DTypeCollectionsFunction REMOVE_FN =
+      x -> ((DCircularQueueImpl<?>) x).queue.remove();
+  private static final DTypeCollectionsFunction POLL_FN =
+      x -> ((DCircularQueueImpl<?>) x).queue.poll();
+  private static final DTypeCollectionsFunction ELEMENT_FN =
+      x -> ((DCircularQueueImpl<?>) x).queue.element();
+  private static final DTypeCollectionsFunction PEEK_FN =
+      x -> ((DCircularQueueImpl<?>) x).queue.peek();
+  private static final DTypeCollectionsFunction SIZE_FN =
+      x -> ((DCircularQueueImpl<?>) x).queue.size();
+  private static final DTypeCollectionsFunction IS_EMPTY_FN =
+      x -> ((DCircularQueueImpl<?>) x).queue.isEmpty();
+  private static final DTypeCollectionsFunction CLEAR_FN = x -> {
+    ((DCircularQueueImpl<?>) x).queue.clear();
+    return null;
+  };
+
   public DCircularQueueImpl() {}
 
   public DCircularQueueImpl(String name, int capacity) {
@@ -63,29 +81,25 @@ public class DCircularQueueImpl<E> extends AbstractDType implements DCircularQue
   @Override
   @SuppressWarnings("unchecked")
   public E remove() {
-    DTypeCollectionsFunction fn = x -> ((DCircularQueueImpl<E>) x).queue.remove();
-    return update(fn, CollectionsBackendFunction.ID);
+    return update(REMOVE_FN, CollectionsBackendFunction.ID);
   }
 
   @Override
   @SuppressWarnings("unchecked")
   public E poll() {
-    DTypeCollectionsFunction fn = x -> ((DCircularQueueImpl<E>) x).queue.poll();
-    return update(fn, CollectionsBackendFunction.ID);
+    return update(POLL_FN, CollectionsBackendFunction.ID);
   }
 
   @Override
   @SuppressWarnings("unchecked")
   public E element() {
-    DTypeCollectionsFunction fn = x -> ((DCircularQueueImpl<E>) x).queue.element();
-    return query(fn, CollectionsBackendFunction.ID);
+    return query(ELEMENT_FN, CollectionsBackendFunction.ID);
   }
 
   @Override
   @SuppressWarnings("unchecked")
   public E peek() {
-    DTypeCollectionsFunction fn = x -> ((DCircularQueueImpl<E>) x).queue.peek();
-    return query(fn, CollectionsBackendFunction.ID);
+    return query(PEEK_FN, CollectionsBackendFunction.ID);
   }
 
   /**
@@ -95,8 +109,7 @@ public class DCircularQueueImpl<E> extends AbstractDType implements DCircularQue
    */
   @Override
   public int size() {
-    DTypeCollectionsFunction fn = x -> ((DCircularQueueImpl<?>) x).queue.size();
-    return query(fn, CollectionsBackendFunction.ID);
+    return query(SIZE_FN, CollectionsBackendFunction.ID);
   }
 
   /**
@@ -106,8 +119,7 @@ public class DCircularQueueImpl<E> extends AbstractDType implements DCircularQue
    */
   @Override
   public boolean isEmpty() {
-    DTypeCollectionsFunction fn = x -> ((DCircularQueueImpl<?>) x).queue.isEmpty();
-    return query(fn, CollectionsBackendFunction.ID);
+    return query(IS_EMPTY_FN, CollectionsBackendFunction.ID);
   }
 
   @Override
@@ -183,11 +195,7 @@ public class DCircularQueueImpl<E> extends AbstractDType implements DCircularQue
 
   @Override
   public void clear() {
-    DTypeCollectionsFunction fn = x -> {
-      ((DCircularQueueImpl<?>) x).queue.clear();
-      return null;
-    };
-    update(fn, CollectionsBackendFunction.ID);
+    update(CLEAR_FN, CollectionsBackendFunction.ID);
   }
 
   @Override

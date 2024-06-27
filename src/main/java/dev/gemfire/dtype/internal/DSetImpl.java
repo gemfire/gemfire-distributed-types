@@ -17,7 +17,15 @@ import org.apache.geode.DataSerializer;
 
 public class DSetImpl<E> extends AbstractDType implements DSet<E> {
 
-  private HashSet<E> set;
+  private transient HashSet<E> set;
+
+  // A few lambdas that can be static since they don't need to capture any values.
+  private static final DTypeCollectionsFunction SIZE_FN = x -> ((DSetImpl<?>) x).set.size();
+  private static final DTypeCollectionsFunction IS_EMPTY_FN = x -> ((DSetImpl<?>) x).set.isEmpty();
+  private static final DTypeCollectionsFunction CLEAR_FN = x -> {
+    ((DSetImpl<?>) x).set.clear();
+    return null;
+  };
 
   public DSetImpl() {}
 
@@ -28,14 +36,12 @@ public class DSetImpl<E> extends AbstractDType implements DSet<E> {
 
   @Override
   public int size() {
-    DTypeCollectionsFunction fn = x -> ((DSetImpl<?>) x).set.size();
-    return query(fn, CollectionsBackendFunction.ID);
+    return query(SIZE_FN, CollectionsBackendFunction.ID);
   }
 
   @Override
   public boolean isEmpty() {
-    DTypeCollectionsFunction fn = x -> ((DSetImpl<?>) x).set.isEmpty();
-    return query(fn, CollectionsBackendFunction.ID);
+    return query(IS_EMPTY_FN, CollectionsBackendFunction.ID);
   }
 
   @Override
@@ -132,11 +138,7 @@ public class DSetImpl<E> extends AbstractDType implements DSet<E> {
 
   @Override
   public void clear() {
-    DTypeCollectionsFunction fn = x -> {
-      ((DSetImpl<?>) x).set.clear();
-      return null;
-    };
-    update(fn, CollectionsBackendFunction.ID);
+    update(CLEAR_FN, CollectionsBackendFunction.ID);
   }
 
   @Override

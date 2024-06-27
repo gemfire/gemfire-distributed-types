@@ -27,6 +27,15 @@ public class DListImpl<E> extends AbstractDType implements DList<E> {
 
   private LinkedList<E> list;
 
+  // A few lambdas that can be static since they don't need to capture any values.
+  private static final DTypeCollectionsFunction SIZE_FN = x -> ((DListImpl<?>) x).list.size();
+  private static final DTypeCollectionsFunction IS_EMPTY_FN =
+      x -> ((DListImpl<?>) x).list.isEmpty();
+  private static final DTypeCollectionsFunction CLEAR_FN = x -> {
+    ((DListImpl<?>) x).list.clear();
+    return null;
+  };
+
   public DListImpl() {}
 
   public DListImpl(String name) {
@@ -36,14 +45,12 @@ public class DListImpl<E> extends AbstractDType implements DList<E> {
 
   @Override
   public int size() {
-    DTypeCollectionsFunction fn = x -> ((DListImpl<?>) x).list.size();
-    return query(fn, CollectionsBackendFunction.ID);
+    return query(SIZE_FN, CollectionsBackendFunction.ID);
   }
 
   @Override
   public boolean isEmpty() {
-    DTypeCollectionsFunction fn = x -> ((DListImpl<?>) x).list.isEmpty();
-    return query(fn, CollectionsBackendFunction.ID);
+    return query(IS_EMPTY_FN, CollectionsBackendFunction.ID);
   }
 
   @Override
@@ -101,11 +108,7 @@ public class DListImpl<E> extends AbstractDType implements DList<E> {
 
   @Override
   public void clear() {
-    DTypeCollectionsFunction fn = x -> {
-      ((DListImpl<?>) x).list.clear();
-      return null;
-    };
-    update(fn, CollectionsBackendFunction.ID);
+    update(CLEAR_FN, CollectionsBackendFunction.ID);
   }
 
   private class DelegatingListIterator implements Iterator<E> {

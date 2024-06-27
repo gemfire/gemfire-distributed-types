@@ -13,6 +13,17 @@ import dev.gemfire.dtype.DSemaphore;
  */
 public class DSemaphoreImpl extends AbstractDType implements DSemaphore {
 
+  private static final DTypeContextualFunction AVAILABLE_PERMITS_FN =
+      (sem, ctx) -> ((DSemaphoreBackend) sem).availablePermits();
+  private static final DTypeContextualFunction GET_QUEUE_LENGTH_FN =
+      (sem, ctx) -> ((DSemaphoreBackend) sem).getQueueLength();
+  private static final DTypeContextualFunction DRAIN_PERMITS_FN =
+      (sem, ctx) -> ((DSemaphoreBackend) sem).drainPermits(ctx);
+  private static final DTypeContextualFunction DESTROY_FN = (sem, ctx) -> {
+    ((DSemaphoreBackend) sem).destroy(ctx);
+    return null;
+  };
+
   public DSemaphoreImpl(String name) {
     super(name);
   }
@@ -68,29 +79,22 @@ public class DSemaphoreImpl extends AbstractDType implements DSemaphore {
 
   @Override
   public int availablePermits() {
-    DTypeContextualFunction fn = (sem, ctx) -> ((DSemaphoreBackend) sem).availablePermits();
-    return query(fn, SemaphoreBackendFunction.ID);
+    return query(AVAILABLE_PERMITS_FN, SemaphoreBackendFunction.ID);
   }
 
   @Override
   public int getQueueLength() {
-    DTypeContextualFunction fn = (sem, ctx) -> ((DSemaphoreBackend) sem).getQueueLength();
-    return query(fn, SemaphoreBackendFunction.ID);
+    return query(GET_QUEUE_LENGTH_FN, SemaphoreBackendFunction.ID);
   }
 
   @Override
   public int drainPermits() {
-    DTypeContextualFunction fn = (sem, ctx) -> ((DSemaphoreBackend) sem).drainPermits(ctx);
-    return update(fn, SemaphoreBackendFunction.ID);
+    return update(DRAIN_PERMITS_FN, SemaphoreBackendFunction.ID);
   }
 
   @Override
   public void destroy() {
-    DTypeContextualFunction fn = (sem, ctx) -> {
-      ((DSemaphoreBackend) sem).destroy(ctx);
-      return null;
-    };
-    query(fn, SemaphoreBackendFunction.ID);
+    query(DESTROY_FN, SemaphoreBackendFunction.ID);
     super.destroy();
   }
 

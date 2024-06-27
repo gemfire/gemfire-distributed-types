@@ -25,6 +25,55 @@ public class DBlockingQueueImpl<E> extends AbstractDType implements DBlockingQue
   private transient LinkedBlockingDeque<E> deque;
   private int capacity;
 
+  // A few lambdas that can be static since they don't need to capture any values.
+  private static final DTypeCollectionsFunction REMOVE_FIRST_FN =
+      x -> ((DBlockingQueueImpl<?>) x).deque.removeFirst();
+  private static final DTypeCollectionsFunction REMOVE_LAST_FN =
+      x -> ((DBlockingQueueImpl<?>) x).deque.removeLast();
+  private static final DTypeCollectionsFunction POLL_FIRST_FN =
+      x -> ((DBlockingQueueImpl<?>) x).deque.pollFirst();
+  private static final DTypeCollectionsFunction POLL_LAST_FN =
+      x -> ((DBlockingQueueImpl<?>) x).deque.pollLast();
+  private static final DTypeCollectionsFunction GET_FIRST_FN =
+      x -> ((DBlockingQueueImpl<?>) x).deque.getFirst();
+  private static final DTypeCollectionsFunction GET_LAST_FN =
+      x -> ((DBlockingQueueImpl<?>) x).deque.getLast();
+  private static final DTypeCollectionsFunction PEEK_FIRST_FN =
+      x -> ((DBlockingQueueImpl<?>) x).deque.peekFirst();
+  private static final DTypeCollectionsFunction PEEK_LAST_FN =
+      x -> ((DBlockingQueueImpl<?>) x).deque.peekLast();
+  private final DTypeCollectionsFunction TAKE_FIRST_FN = x -> {
+    E result = ((DBlockingQueueImpl<E>) x).deque.pollFirst();
+    if (result == null) {
+      throw new RetryableException(100);
+    }
+    return result;
+  };
+  private final DTypeCollectionsFunction TAKE_LAST_FN = x -> {
+    E result = ((DBlockingQueueImpl<E>) x).deque.pollLast();
+    if (result == null) {
+      throw new RetryableException(100);
+    }
+    return result;
+  };
+  private static final DTypeCollectionsFunction REMOVE_FN =
+      x -> ((DBlockingQueueImpl<?>) x).deque.remove();
+
+  private static final DTypeCollectionsFunction REMAINING_CAPACITY_FN =
+      x -> ((DBlockingQueueImpl<?>) x).deque.remainingCapacity();
+  private static final DTypeCollectionsFunction ELEMENT_FN =
+      x -> ((DBlockingQueueImpl<?>) x).deque.element();
+  private static final DTypeCollectionsFunction PEEK_FN =
+      x -> ((DBlockingQueueImpl<?>) x).deque.peek();
+  private static final DTypeCollectionsFunction CLEAR_FN = x -> {
+    ((DBlockingQueueImpl<?>) x).deque.clear();
+    return null;
+  };
+  private static final DTypeCollectionsFunction SIZE_FN =
+      x -> ((DBlockingQueueImpl<?>) x).deque.size();
+  private static final DTypeCollectionsFunction IS_EMPTY_FN =
+      x -> ((DBlockingQueueImpl<?>) x).deque.isEmpty();
+
   public DBlockingQueueImpl() {}
 
   public DBlockingQueueImpl(String name) {
@@ -79,50 +128,42 @@ public class DBlockingQueueImpl<E> extends AbstractDType implements DBlockingQue
 
   @Override
   public E removeFirst() {
-    DTypeCollectionsFunction fn = x -> ((DBlockingQueueImpl<?>) x).deque.removeFirst();
-    return update(fn, CollectionsBackendFunction.ID);
+    return update(REMOVE_FIRST_FN, CollectionsBackendFunction.ID);
   }
 
   @Override
   public E removeLast() {
-    DTypeCollectionsFunction fn = x -> ((DBlockingQueueImpl<?>) x).deque.removeLast();
-    return update(fn, CollectionsBackendFunction.ID);
+    return update(REMOVE_LAST_FN, CollectionsBackendFunction.ID);
   }
 
   @Override
   public E pollFirst() {
-    DTypeCollectionsFunction fn = x -> ((DBlockingQueueImpl<?>) x).deque.pollFirst();
-    return update(fn, CollectionsBackendFunction.ID);
+    return update(POLL_FIRST_FN, CollectionsBackendFunction.ID);
   }
 
   @Override
   public E pollLast() {
-    DTypeCollectionsFunction fn = x -> ((DBlockingQueueImpl<?>) x).deque.pollLast();
-    return update(fn, CollectionsBackendFunction.ID);
+    return update(POLL_LAST_FN, CollectionsBackendFunction.ID);
   }
 
   @Override
   public E getFirst() {
-    DTypeCollectionsFunction fn = x -> ((DBlockingQueueImpl<?>) x).deque.getFirst();
-    return update(fn, CollectionsBackendFunction.ID);
+    return update(GET_FIRST_FN, CollectionsBackendFunction.ID);
   }
 
   @Override
   public E getLast() {
-    DTypeCollectionsFunction fn = x -> ((DBlockingQueueImpl<?>) x).deque.getLast();
-    return update(fn, CollectionsBackendFunction.ID);
+    return update(GET_LAST_FN, CollectionsBackendFunction.ID);
   }
 
   @Override
   public E peekFirst() {
-    DTypeCollectionsFunction fn = x -> ((DBlockingQueueImpl<?>) x).deque.peekFirst();
-    return update(fn, CollectionsBackendFunction.ID);
+    return update(PEEK_FIRST_FN, CollectionsBackendFunction.ID);
   }
 
   @Override
   public E peekLast() {
-    DTypeCollectionsFunction fn = x -> ((DBlockingQueueImpl<?>) x).deque.peekLast();
-    return update(fn, CollectionsBackendFunction.ID);
+    return update(PEEK_LAST_FN, CollectionsBackendFunction.ID);
   }
 
   @Override
@@ -179,27 +220,13 @@ public class DBlockingQueueImpl<E> extends AbstractDType implements DBlockingQue
   @Override
   @SuppressWarnings("unchecked")
   public E takeFirst() throws InterruptedException {
-    DTypeCollectionsFunction fn = x -> {
-      E result = ((DBlockingQueueImpl<E>) x).deque.pollFirst();
-      if (result == null) {
-        throw new RetryableException(100);
-      }
-      return result;
-    };
-    return updateInterruptibly(fn, CollectionsBackendFunction.ID);
+    return updateInterruptibly(TAKE_FIRST_FN, CollectionsBackendFunction.ID);
   }
 
   @Override
   @SuppressWarnings("unchecked")
   public E takeLast() throws InterruptedException {
-    DTypeCollectionsFunction fn = x -> {
-      E result = ((DBlockingQueueImpl<E>) x).deque.pollLast();
-      if (result == null) {
-        throw new RetryableException(100);
-      }
-      return result;
-    };
-    return updateInterruptibly(fn, CollectionsBackendFunction.ID);
+    return updateInterruptibly(TAKE_LAST_FN, CollectionsBackendFunction.ID);
   }
 
   @Override
@@ -290,8 +317,7 @@ public class DBlockingQueueImpl<E> extends AbstractDType implements DBlockingQue
   @Override
   @SuppressWarnings("unchecked")
   public E remove() {
-    DTypeCollectionsFunction fn = x -> ((DBlockingQueueImpl<E>) x).deque.remove();
-    return update(fn, CollectionsBackendFunction.ID);
+    return update(REMOVE_FN, CollectionsBackendFunction.ID);
   }
 
   @Override
@@ -320,20 +346,17 @@ public class DBlockingQueueImpl<E> extends AbstractDType implements DBlockingQue
 
   @Override
   public int remainingCapacity() {
-    DTypeCollectionsFunction fn = x -> ((DBlockingQueueImpl<?>) x).deque.remainingCapacity();
-    return query(fn, CollectionsBackendFunction.ID);
+    return query(REMAINING_CAPACITY_FN, CollectionsBackendFunction.ID);
   }
 
   @Override
   public E element() {
-    DTypeCollectionsFunction fn = x -> ((DBlockingQueueImpl<?>) x).deque.element();
-    return query(fn, CollectionsBackendFunction.ID);
+    return query(ELEMENT_FN, CollectionsBackendFunction.ID);
   }
 
   @Override
   public E peek() {
-    DTypeCollectionsFunction fn = x -> ((DBlockingQueueImpl<?>) x).deque.peek();
-    return query(fn, CollectionsBackendFunction.ID);
+    return query(PEEK_FN, CollectionsBackendFunction.ID);
   }
 
   @Override
@@ -379,11 +402,7 @@ public class DBlockingQueueImpl<E> extends AbstractDType implements DBlockingQue
 
   @Override
   public void clear() {
-    DTypeCollectionsFunction fn = x -> {
-      ((DBlockingQueueImpl<?>) x).deque.clear();
-      return null;
-    };
-    update(fn, CollectionsBackendFunction.ID);
+    update(CLEAR_FN, CollectionsBackendFunction.ID);
   }
 
   @Override
@@ -422,14 +441,12 @@ public class DBlockingQueueImpl<E> extends AbstractDType implements DBlockingQue
 
   @Override
   public int size() {
-    DTypeCollectionsFunction fn = x -> ((DBlockingQueueImpl<?>) x).deque.size();
-    return query(fn, CollectionsBackendFunction.ID);
+    return query(SIZE_FN, CollectionsBackendFunction.ID);
   }
 
   @Override
   public boolean isEmpty() {
-    DTypeCollectionsFunction fn = x -> ((DBlockingQueueImpl<?>) x).deque.isEmpty();
-    return query(fn, CollectionsBackendFunction.ID);
+    return query(IS_EMPTY_FN, CollectionsBackendFunction.ID);
   }
 
   /**

@@ -14,6 +14,40 @@ public class DCountDownLatchImpl extends AbstractDType implements DCountDownLatc
   private boolean isDestroyed = false;
   private int waiters = 0;
 
+  private final DTypeCollectionsFunction AWAIT_FN = x -> {
+    DCountDownLatchImpl latch = (DCountDownLatchImpl) x;
+    latch.ensureUsable();
+    while (latch.count > 0) {
+      try {
+        latch.waiters++;
+        latch.wait();
+      } catch (InterruptedException e) {
+        throw new RuntimeException(e);
+      } finally {
+        latch.waiters--;
+      }
+    }
+    return null;
+  };
+
+  private final DTypeCollectionsFunction COUNTDOWN_FN = x -> {
+    DCountDownLatchImpl latch = (DCountDownLatchImpl) x;
+    latch.ensureUsable();
+    if (latch.count > 0) {
+      latch.count -= 1;
+      if (latch.count == 0) {
+        latch.notifyAll();
+      }
+    }
+    return null;
+  };
+  private static final DTypeCollectionsFunction GET_COUNT_FN = x -> ((DCountDownLatchImpl) x).count;
+  private static final DTypeCollectionsFunction DESTROY_FN = x -> {
+    ((DCountDownLatchImpl) x).isDestroyed = true;
+    x.notifyAll();
+    return null;
+  };
+
   public DCountDownLatchImpl() {
     // For serialization
   }
@@ -25,21 +59,7 @@ public class DCountDownLatchImpl extends AbstractDType implements DCountDownLatc
 
   @Override
   public void await() {
-    DTypeCollectionsFunction fn = x -> {
-      DCountDownLatchImpl latch = (DCountDownLatchImpl) x;
-      while (latch.count > 0) {
-        try {
-          latch.waiters++;
-          latch.wait();
-        } catch (InterruptedException e) {
-          throw new RuntimeException(e);
-        } finally {
-          latch.waiters--;
-        }
-      }
-      return null;
-    };
-    noDeltaUpdate(fn, CollectionsBackendFunction.ID);
+    noDeltaUpdate(AWAIT_FN, CollectionsBackendFunction.ID);
   }
 
   @Override
@@ -55,7 +75,7 @@ public class DCountDownLatchImpl extends AbstractDType implements DCountDownLatc
       long start = System.currentTimeMillis();
 
       while (latch.count > 0 && System.currentTimeMillis() - start < overallTimeoutMs) {
-        ensureUsable();
+        latch.ensureUsable();
         try {
           latch.waiters++;
           long waitStart = System.currentTimeMillis();
@@ -77,31 +97,19 @@ public class DCountDownLatchImpl extends AbstractDType implements DCountDownLatc
 
   @Override
   public void countDown() {
-    DTypeCollectionsFunction fn = x -> {
-      DCountDownLatchImpl latch = (DCountDownLatchImpl) x;
-      ensureUsable();
-      if (latch.count > 0) {
-        latch.count -= 1;
-        if (latch.count == 0) {
-          latch.notifyAll();
-        }
-      }
-      return null;
-    };
-    noDeltaUpdate(fn, CollectionsBackendFunction.ID);
+    noDeltaUpdate(COUNTDOWN_FN, CollectionsBackendFunction.ID);
   }
 
   @Override
   public long getCount() {
-    DTypeCollectionsFunction fn = x -> ((DCountDownLatchImpl) x).count;
-    return query(fn, CollectionsBackendFunction.ID);
+    return query(GET_COUNT_FN, CollectionsBackendFunction.ID);
   }
 
   @Override
   public boolean setCount(long newCount) {
     DTypeCollectionsFunction fn = x -> {
-      ensureUsable();
       DCountDownLatchImpl latch = (DCountDownLatchImpl) x;
+      latch.ensureUsable();
       if (latch.count > 0) {
         return false;
       }
@@ -113,18 +121,14 @@ public class DCountDownLatchImpl extends AbstractDType implements DCountDownLatc
 
   @Override
   public void destroy() {
-    DTypeCollectionsFunction fn = x -> {
-      ((DCountDownLatchImpl) x).isDestroyed = true;
-      x.notifyAll();
-      return null;
-    };
-    noDeltaUpdate(fn, CollectionsBackendFunction.ID);
+    noDeltaUpdate(DESTROY_FN, CollectionsBackendFunction.ID);
     super.destroy();
   }
 
+  DTypeCollectionsFunction GET_WAITERS_FN = x -> ((DCountDownLatchImpl) x).waiters;
+
   public int getWaiters() {
-    DTypeCollectionsFunction fn = x -> ((DCountDownLatchImpl) x).waiters;
-    return query(fn, CollectionsBackendFunction.ID);
+    return query(GET_WAITERS_FN, CollectionsBackendFunction.ID);
   }
 
   @Override

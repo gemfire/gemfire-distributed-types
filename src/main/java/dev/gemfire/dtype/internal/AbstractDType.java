@@ -29,7 +29,7 @@ public abstract class AbstractDType implements Delta, DataSerializable, DType {
 
   private String name;
   private transient Region<String, Object> region;
-  private DTypeCollectionsFunction deltaOperation = null;
+  private transient DTypeCollectionsFunction deltaOperation = null;
   private transient OperationPerformer operationPerformer;
 
   public AbstractDType() {}
@@ -147,7 +147,7 @@ public abstract class AbstractDType implements Delta, DataSerializable, DType {
     }
   }
 
-  protected byte[] serialize(Object o) {
+  protected static byte[] serialize(Object o) {
     HeapDataOutputStream heap = new HeapDataOutputStream(0);
     try {
       DataSerializer.writeObject(o, heap);
@@ -157,7 +157,7 @@ public abstract class AbstractDType implements Delta, DataSerializable, DType {
     return heap.toByteArray();
   }
 
-  protected <R> R deserialize(byte[] data) {
+  protected static <R> R deserialize(byte[] data) {
     R result;
     try {
       result = DataSerializer.readObject(new ByteArrayDataInput(data));
