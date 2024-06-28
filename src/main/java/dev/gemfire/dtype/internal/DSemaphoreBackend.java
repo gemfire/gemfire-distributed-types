@@ -76,7 +76,7 @@ public class DSemaphoreBackend extends AbstractDType {
         }
         this.wait();
       } catch (InterruptedException e) {
-        throw new UncheckInterruptedException(e);
+        throw new UncheckedInterruptedException(e);
       } finally {
         queueLength--;
       }

@@ -6,11 +6,11 @@ package dev.gemfire.dtype.internal;
 
 /**
  * If an operation generates an InterruptedException on a server, it is wrapped in an
- * UncheckInterruptedException and propagated back to the client.
+ * UncheckedInterruptedException and propagated back to the client.
  */
-public class UncheckInterruptedException extends RuntimeException {
+public class UncheckedInterruptedException extends RuntimeException {
 
-  public UncheckInterruptedException(Throwable cause) {
+  public UncheckedInterruptedException(Throwable cause) {
     super(cause);
   }
 

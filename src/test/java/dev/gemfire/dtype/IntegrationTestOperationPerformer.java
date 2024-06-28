@@ -12,7 +12,7 @@ import dev.gemfire.dtype.internal.DTypeFunction;
 import dev.gemfire.dtype.internal.OperationPerformer;
 import dev.gemfire.dtype.internal.OperationType;
 import dev.gemfire.dtype.internal.RetryableException;
-import dev.gemfire.dtype.internal.UncheckInterruptedException;
+import dev.gemfire.dtype.internal.UncheckedInterruptedException;
 
 public class IntegrationTestOperationPerformer implements OperationPerformer {
 
@@ -43,7 +43,7 @@ public class IntegrationTestOperationPerformer implements OperationPerformer {
           Thread.sleep(retrySleepTime);
         } catch (InterruptedException e) {
           Thread.currentThread().interrupt();
-          throw new UncheckInterruptedException(e);
+          throw new UncheckedInterruptedException(e);
         }
       }
     } while (retrySleepTime > 0);

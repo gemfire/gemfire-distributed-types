@@ -82,7 +82,7 @@ public abstract class AbstractDType implements Delta, DataSerializable, DType {
       if (Thread.currentThread().isInterrupted()) {
         throw new InterruptedException();
       }
-      if (ex instanceof UncheckInterruptedException) {
+      if (ex instanceof UncheckedInterruptedException) {
         throw (InterruptedException) ex.getCause();
       }
       throw ex;
@@ -101,7 +101,7 @@ public abstract class AbstractDType implements Delta, DataSerializable, DType {
       if (Thread.currentThread().isInterrupted()) {
         throw new InterruptedException();
       }
-      if (ex instanceof UncheckInterruptedException) {
+      if (ex instanceof UncheckedInterruptedException) {
         throw (InterruptedException) ex.getCause();
       }
       throw ex;

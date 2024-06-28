@@ -69,7 +69,7 @@ public class CollectionsBackendFunction implements Function<Object> {
           Thread.sleep(retrySleepTime);
         } catch (InterruptedException e) {
           Thread.currentThread().interrupt();
-          context.getResultSender().sendException(new UncheckInterruptedException(e));
+          context.getResultSender().sendException(new UncheckedInterruptedException(e));
           break;
         }
       }
