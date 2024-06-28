@@ -124,7 +124,12 @@ persisted and is not user-configurable.
 
 ### Looking for Support
 
-This project is supported by the GemFire community and is not an official part of the GemFire product. It is an extension used by our services team at several customer installations. You are welcome to review and deploy it at your own risk; however, please note that GemFire support does not cover this extension.
+This project is supported by the GemFire community and is not an official part of the GemFire
+product. It is an extension used by our services team at several customer installations. You are
+welcome to review and deploy it at your own risk; however, please note that GemFire support does not
+cover this extension.
 
-If you require additional assistance, our services team is here to help. Please contact your account executive and request services support for integrating GemFire with this extension. They will connect you with the appropriate team member.
+If you require additional assistance, our services team is here to help. Please contact your account
+executive and request services support for integrating GemFire with this extension. They will
+connect you with the appropriate team member.
 
