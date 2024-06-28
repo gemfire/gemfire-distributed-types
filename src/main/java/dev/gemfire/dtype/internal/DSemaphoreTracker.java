@@ -63,8 +63,12 @@ public class DSemaphoreTracker implements ClientMembershipListener {
   }
 
   private void releaseAll(DistributedMember member) {
-    Set<DSemaphoreBackend> semaphores =
-        memberSemaphores.remove(((MemberIdentifier) member).getUniqueTag());
+    String memberTag = ((MemberIdentifier) member).getUniqueTag();
+    if (memberTag == null) {
+      return;
+    }
+
+    Set<DSemaphoreBackend> semaphores = memberSemaphores.remove(memberTag);
     if (semaphores == null || semaphores.isEmpty()) {
       return;
     }
