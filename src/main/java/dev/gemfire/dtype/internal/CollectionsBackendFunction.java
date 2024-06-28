@@ -60,10 +60,8 @@ public class CollectionsBackendFunction implements Function<Object> {
             break;
           }
         } catch (Exception ex) {
-          if (ex instanceof MarkerException) {
-            throw (MarkerException) ex;
-          }
-          throw new MarkerException(ex);
+          context.getResultSender().sendException(ex);
+          return;
         }
       }
       if (retrySleepTime > 0) {
@@ -71,7 +69,8 @@ public class CollectionsBackendFunction implements Function<Object> {
           Thread.sleep(retrySleepTime);
         } catch (InterruptedException e) {
           Thread.currentThread().interrupt();
-          throw new MarkerException(e);
+          context.getResultSender().sendException(new UncheckInterruptedException(e));
+          break;
         }
       }
     } while (retrySleepTime > 0);

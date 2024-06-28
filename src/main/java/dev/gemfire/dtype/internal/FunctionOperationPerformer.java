@@ -35,35 +35,18 @@ public class FunctionOperationPerformer implements OperationPerformer {
     Set<String> filter = Collections.singleton(entry.getName());
 
     T result;
-    try {
-      ResultCollector<T, List<T>> collector =
-          FunctionService.onRegion(region)
-              .withFilter(filter)
-              .setArguments(args)
-              .execute(gemfireFunctionId);
+    ResultCollector<T, List<T>> collector =
+        FunctionService.onRegion(region)
+            .withFilter(filter)
+            .setArguments(args)
+            .execute(gemfireFunctionId);
 
-      result = collector.getResult().get(0);
-    } catch (Exception e) {
-      RuntimeException realCause = findMarkedException(e);
-      if (realCause != null) {
-        realCause.addSuppressed(e);
-        throw realCause;
-      }
-      throw e;
+    result = collector.getResult().get(0);
+    if (result instanceof RuntimeException) {
+      throw (RuntimeException) result;
     }
 
     return result;
-  }
-
-  private RuntimeException findMarkedException(Exception e) {
-    Throwable cause = e;
-    while (cause != null) {
-      if (cause instanceof MarkerException) {
-        return (RuntimeException) cause.getCause();
-      }
-      cause = cause.getCause();
-    }
-    return null;
   }
 
 }

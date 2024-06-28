@@ -85,7 +85,7 @@ public class DCountDownLatchImpl extends AbstractDType implements DCountDownLatc
             return true;
           }
         } catch (InterruptedException e) {
-          throw new MarkerException(e);
+          throw new UncheckInterruptedException(e);
         } finally {
           latch.waiters--;
         }

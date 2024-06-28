@@ -55,11 +55,9 @@ public class SemaphoreBackendFunction implements Function<Object> {
     synchronized (finalEntry) {
       try {
         result = ((PartitionedRegion) region).computeWithPrimaryLocked(name, wrappingFn);
-      } catch (Exception e) {
-        if (e instanceof MarkerException) {
-          throw (MarkerException) e;
-        }
-        throw new MarkerException(e);
+      } catch (Exception ex) {
+        context.getResultSender().sendException(ex);
+        return;
       }
     }
 

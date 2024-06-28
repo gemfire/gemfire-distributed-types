@@ -9,10 +9,10 @@ import static org.apache.geode.util.internal.UncheckedUtils.uncheckedCast;
 import dev.gemfire.dtype.internal.AbstractDType;
 import dev.gemfire.dtype.internal.DTypeCollectionsFunction;
 import dev.gemfire.dtype.internal.DTypeFunction;
-import dev.gemfire.dtype.internal.MarkerException;
 import dev.gemfire.dtype.internal.OperationPerformer;
 import dev.gemfire.dtype.internal.OperationType;
 import dev.gemfire.dtype.internal.RetryableException;
+import dev.gemfire.dtype.internal.UncheckInterruptedException;
 
 public class IntegrationTestOperationPerformer implements OperationPerformer {
 
@@ -43,7 +43,7 @@ public class IntegrationTestOperationPerformer implements OperationPerformer {
           Thread.sleep(retrySleepTime);
         } catch (InterruptedException e) {
           Thread.currentThread().interrupt();
-          throw new MarkerException(e);
+          throw new UncheckInterruptedException(e);
         }
       }
     } while (retrySleepTime > 0);

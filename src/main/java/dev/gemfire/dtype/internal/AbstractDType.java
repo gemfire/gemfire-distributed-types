@@ -77,10 +77,15 @@ public abstract class AbstractDType implements Delta, DataSerializable, DType {
     try {
       return update(fn, functionId);
     } catch (Exception ex) {
+      // This needs to be set correctly by GemFire's fn execution code - i.e. when a blocked
+      // fn call is actually interrupted.
       if (Thread.currentThread().isInterrupted()) {
         throw new InterruptedException();
       }
-      throw new RuntimeException(ex);
+      if (ex instanceof UncheckInterruptedException) {
+        throw (InterruptedException) ex.getCause();
+      }
+      throw ex;
     }
   }
 
@@ -96,7 +101,10 @@ public abstract class AbstractDType implements Delta, DataSerializable, DType {
       if (Thread.currentThread().isInterrupted()) {
         throw new InterruptedException();
       }
-      throw new RuntimeException(ex);
+      if (ex instanceof UncheckInterruptedException) {
+        throw (InterruptedException) ex.getCause();
+      }
+      throw ex;
     }
   }
 
