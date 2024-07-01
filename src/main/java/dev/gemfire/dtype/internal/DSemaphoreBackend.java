@@ -71,7 +71,7 @@ public class DSemaphoreBackend extends AbstractDType {
       try {
         queueLength++;
         if (logger.isDebugEnabled()) {
-          logger.debug("Waiting to acquire semaphore '{}' for member {}", getName(),
+          logger.debug("Waiting to acquire semaphore '{}' by member {}", getName(),
               ((DSemaphoreFunctionContext) context).getMemberTag());
         }
         this.wait();
@@ -91,8 +91,8 @@ public class DSemaphoreBackend extends AbstractDType {
       permitHolders.compute(semContext.getMemberTag(), (k, v) -> v == null ? 1 : v + permits);
       semContext.getTracker().add(semContext.getMemberTag(), this);
       if (logger.isDebugEnabled()) {
-        logger.debug("Acquired semaphore '{}' for member {}", getName(),
-            semContext.getMemberTag());
+        logger.debug("Member {} acquired semaphore '{}'", semContext.getMemberTag(),
+            getName());
       }
       return true;
     }

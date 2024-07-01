@@ -141,6 +141,26 @@ public class DSemaphoreDUnitTest {
   }
 
   @Test
+  public void testSemaphorePermitsAreReleasedAfterClientCrashes() throws Exception {
+    int locatorPort = locator.getPort();
+    ClientVM client1 = cluster.startClientVM(3, x -> x.withLocatorConnection(locatorPort));
+    client1.invoke(() -> {
+      DTypeFactory factory = new DTypeFactory(ClusterStartupRule.getClientCache());
+      DSemaphore sem = factory.createDSemaphore(SEM_NAME, 1);
+      sem.acquire();
+    });
+
+    DSemaphore semaphore = factory.createDSemaphore(SEM_NAME, 1);
+    Future<Void> future = executor.submit(() -> semaphore.acquire());
+    GeodeAwaitility.await()
+        .untilAsserted(() -> assertThat(semaphore.getQueueLength()).isEqualTo(1));
+
+    client1.getVM().bounceForcibly();
+
+    assertThatNoException().isThrownBy(() -> future.get(60, TimeUnit.SECONDS));
+  }
+
+  @Test
   public void testSemaphoreIsDestroyed() {
     DSemaphore semaphore = factory.createDSemaphore(SEM_NAME, 1);
 
