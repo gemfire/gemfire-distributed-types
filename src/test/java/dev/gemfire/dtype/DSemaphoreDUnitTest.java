@@ -15,10 +15,12 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import org.awaitility.Awaitility;
-import org.junit.After;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestName;
 
 import org.apache.geode.cache.client.ClientCache;
 import org.apache.geode.cache.client.ClientCacheFactory;
@@ -31,7 +33,8 @@ import org.apache.geode.test.junit.rules.ExecutorServiceRule;
 
 public class DSemaphoreDUnitTest {
 
-  private static final String SEM_NAME = "semi";
+  @Rule
+  public TestName testName = new TestName();
 
   @ClassRule
   public static ClusterStartupRule cluster = new ClusterStartupRule();
@@ -44,9 +47,12 @@ public class DSemaphoreDUnitTest {
   private static MemberVM server1;
   private static MemberVM server2;
   private static DTypeFactory factory;
+  private static ClientCache client;
+
+  private String semaphoreName;
 
   @BeforeClass
-  public static void setup() {
+  public static void setup() throws Exception {
     locator = cluster.startLocatorVM(0);
 
     props.setProperty(SERIALIZABLE_OBJECT_FILTER, "dev.gemfire.dtype.**");
@@ -54,21 +60,21 @@ public class DSemaphoreDUnitTest {
     server1 = cluster.startServerVM(1, props, locator.getPort());
     server2 = cluster.startServerVM(2, props, locator.getPort());
 
-    ClientCache client = new ClientCacheFactory()
+    client = new ClientCacheFactory()
         .addPoolLocator("localhost", locator.getPort())
         .create();
 
     factory = new DTypeFactory(client);
   }
 
-  @After
-  public void cleanup() {
-    factory.destroy(SEM_NAME);
+  @Before
+  public void before() {
+    semaphoreName = testName.getMethodName();
   }
 
   @Test
   public void testAcquire() {
-    DSemaphore semaphore = factory.createDSemaphore(SEM_NAME, 1);
+    DSemaphore semaphore = factory.createDSemaphore(semaphoreName, 1);
 
     semaphore.acquire();
 
@@ -82,10 +88,10 @@ public class DSemaphoreDUnitTest {
 
   @Test
   public void testAcquireUsingMultipleThreads() throws Exception {
-    DSemaphore semaphore1 = factory.createDSemaphore(SEM_NAME, 1);
+    DSemaphore semaphore1 = factory.createDSemaphore(semaphoreName, 1);
     semaphore1.acquire();
 
-    DSemaphore semaphore2 = factory.createDSemaphore(SEM_NAME, 1);
+    DSemaphore semaphore2 = factory.createDSemaphore(semaphoreName, 1);
     Future<Void> future = executor.submit(() -> semaphore2.acquire());
 
     Awaitility.await().atMost(Duration.ofSeconds(30))
@@ -99,10 +105,10 @@ public class DSemaphoreDUnitTest {
 
   @Test
   public void testSemaphorePermitsAreRecoveredAfterServerCrash() {
-    DSemaphore semaphore = factory.createDSemaphore(SEM_NAME, 1);
+    DSemaphore semaphore = factory.createDSemaphore(semaphoreName, 1);
     semaphore.acquire();
 
-    MemberVM primary = TestUtils.getServerForKey(SEM_NAME, server1, server2);
+    MemberVM primary = TestUtils.getServerForKey(semaphoreName, server1, server2);
 
     primary.stop();
 
@@ -122,13 +128,14 @@ public class DSemaphoreDUnitTest {
   public void testSemaphorePermitsAreReleasedAfterClientDisconnect() throws Exception {
     int locatorPort = locator.getPort();
     ClientVM client1 = cluster.startClientVM(3, x -> x.withLocatorConnection(locatorPort));
+    String localName = semaphoreName;
     client1.invoke(() -> {
       DTypeFactory factory = new DTypeFactory(ClusterStartupRule.getClientCache());
-      DSemaphore sem = factory.createDSemaphore(SEM_NAME, 1);
+      DSemaphore sem = factory.createDSemaphore(localName, 1);
       sem.acquire();
     });
 
-    DSemaphore semaphore = factory.createDSemaphore(SEM_NAME, 1);
+    DSemaphore semaphore = factory.createDSemaphore(semaphoreName, 1);
     Future<Void> future = executor.submit(() -> semaphore.acquire());
     GeodeAwaitility.await()
         .untilAsserted(() -> assertThat(semaphore.getQueueLength()).isEqualTo(1));
@@ -144,13 +151,14 @@ public class DSemaphoreDUnitTest {
   public void testSemaphorePermitsAreReleasedAfterClientCrashes() throws Exception {
     int locatorPort = locator.getPort();
     ClientVM client1 = cluster.startClientVM(3, x -> x.withLocatorConnection(locatorPort));
+    String localName = semaphoreName;
     client1.invoke(() -> {
       DTypeFactory factory = new DTypeFactory(ClusterStartupRule.getClientCache());
-      DSemaphore sem = factory.createDSemaphore(SEM_NAME, 1);
+      DSemaphore sem = factory.createDSemaphore(localName, 1);
       sem.acquire();
     });
 
-    DSemaphore semaphore = factory.createDSemaphore(SEM_NAME, 1);
+    DSemaphore semaphore = factory.createDSemaphore(semaphoreName, 1);
     Future<Void> future = executor.submit(() -> semaphore.acquire());
     GeodeAwaitility.await()
         .untilAsserted(() -> assertThat(semaphore.getQueueLength()).isEqualTo(1));
@@ -162,7 +170,7 @@ public class DSemaphoreDUnitTest {
 
   @Test
   public void testSemaphoreIsDestroyed() {
-    DSemaphore semaphore = factory.createDSemaphore(SEM_NAME, 1);
+    DSemaphore semaphore = factory.createDSemaphore(semaphoreName, 1);
 
     semaphore.destroy();
 
@@ -171,7 +179,7 @@ public class DSemaphoreDUnitTest {
 
   @Test
   public void testDestroyedSemaphoreReleasesBlockedClients() {
-    DSemaphore semaphore = factory.createDSemaphore(SEM_NAME, 1);
+    DSemaphore semaphore = factory.createDSemaphore(semaphoreName, 1);
 
     Future<Void> future = executor.submit(() -> semaphore.acquire(2));
     GeodeAwaitility.await()
@@ -184,7 +192,7 @@ public class DSemaphoreDUnitTest {
 
   @Test
   public void testDrainAll() {
-    DSemaphore semaphore = factory.createDSemaphore(SEM_NAME, 3);
+    DSemaphore semaphore = factory.createDSemaphore(semaphoreName, 3);
 
     assertThat(semaphore.drainPermits()).isEqualTo(3);
     assertThat(semaphore.availablePermits()).isEqualTo(0);
@@ -192,7 +200,7 @@ public class DSemaphoreDUnitTest {
 
   @Test
   public void testConcurrentSemaphoreAcquireRelease() {
-    DSemaphore semaphore = factory.createDSemaphore(SEM_NAME, 1);
+    DSemaphore semaphore = factory.createDSemaphore(semaphoreName, 1);
 
     new ConcurrentLoopingThreads(1000,
         i -> acquireRelease(semaphore),

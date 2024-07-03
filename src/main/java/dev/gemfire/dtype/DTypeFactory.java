@@ -31,6 +31,14 @@ import org.apache.geode.internal.cache.GemFireCacheImpl;
  * <p>
  * Instances are created or retrieved if a named type already exists. Thus, the same call can be
  * used by different clients, but only one backend instance will be created as necessary.
+ * <p>
+ * Created instances should be explicitly removed using {@code destroy()}. This will remove the
+ * entry from the backing region. This is a cluster-wide operation, meaning that other clients will
+ * error or produce unexpected results if trying to operate on an instance that has been destroyed
+ * elsewhere.
+ *
+ * @implNote The current implementation uses a PARTITION_REDUNDANT backing region, named
+ *           {@code /DTYPES}, to store entries.
  */
 public class DTypeFactory {
 
@@ -66,10 +74,6 @@ public class DTypeFactory {
     String memberTag = ((MemberIdentifier) cacheImpl.getDistributedSystem().getDistributedMember())
         .getUniqueTag();
     this.operationPerformer = performerFunctionFactory.apply(region, memberTag);
-  }
-
-  public void destroy(String name) {
-    region.destroy(name);
   }
 
   public DAtomicLong createAtomicLong(String name) {
@@ -149,7 +153,7 @@ public class DTypeFactory {
     return createDAtomicReference(name, null);
   }
 
-  public DCountDownLatchImpl createDCountDownLatch(String name, int count) {
+  public DCountDownLatch createDCountDownLatch(String name, int count) {
     DCountDownLatchImpl value = (DCountDownLatchImpl) region.computeIfAbsent(name,
         r -> new DCountDownLatchImpl(name, count));
     value.initialize(region, operationPerformer);
