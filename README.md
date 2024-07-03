@@ -21,11 +21,12 @@ access.
 - DAtomicReference
 - DSemaphore
 - DCountDownLatch
+- DCounter
 
 ### Other
 
 - DSnowflake
-- 
+
 ### Examples
 
 Almost all the types are created using a `DTypeFactory`:
@@ -81,9 +82,14 @@ equality as a way to compare objects.
 
 `DCountDownLatch` provides an implementation similar to Java's `CountDownLatch`.
 
-Note that any methods which can wait (and block) will automatically be retried if the server they
-are connected to crashes or stops. If the particular method semantics also provide a timeout, the
-timeout will be restarted.
+`DCounter` provides a counter that is a bit simpler than `DAtomicLong` but with better performance.
+The current implementation utilizes GemFire's Delta interface in order to distribute updates to the
+value instead of the actual value. This approach avoids the need to ensure write ordering (always a
+problem when updates are being generated across a distributed system).
+
+> Note that any methods which can wait (and block) will automatically be retried if the server they
+> are connected to crashes or stops. If the particular method semantics also provide a timeout, the
+> timeout will be restarted.
 
 ### Developing and Deploying
 
@@ -113,13 +119,13 @@ verify that the extension has been found and initialized.
 
 ### Implementation details
 
-These types are implemented using a partitioned region and function calls. Operations are
+These types are primarily implemented using a partitioned region and function calls. Operations are
 captured as lambdas and then routed to the server hosting the primary bucket for the given instance,
 where the operation is applied. Each collection implements GemFire's Delta interface which allows
 the operation to be sent as a delta change to the secondary server.
 
 The backing region is called `DTYPES`. It is a Partitioned Region with a redundancy of 1 (i.e.
-an additional copy of each structure is stored on a different server). Initially, this region is not
+an additional copy of each structure is stored on a different server). Currently, this region is not
 persisted and is not user-configurable.
 
 ### Looking for Support

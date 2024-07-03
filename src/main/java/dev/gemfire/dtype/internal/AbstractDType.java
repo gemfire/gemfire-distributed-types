@@ -43,6 +43,7 @@ public abstract class AbstractDType implements Delta, DataSerializable, DType {
     return name;
   }
 
+  @Override
   public void destroy() {
     region.remove(name);
   }
