@@ -11,6 +11,7 @@ import dev.gemfire.dtype.internal.DAtomicReferenceImpl;
 import dev.gemfire.dtype.internal.DBlockingQueueImpl;
 import dev.gemfire.dtype.internal.DCircularQueueImpl;
 import dev.gemfire.dtype.internal.DCountDownLatchImpl;
+import dev.gemfire.dtype.internal.DCounterImpl;
 import dev.gemfire.dtype.internal.DListImpl;
 import dev.gemfire.dtype.internal.DSemaphoreImpl;
 import dev.gemfire.dtype.internal.DSetImpl;
@@ -152,6 +153,19 @@ public class DTypeFactory {
     DCountDownLatchImpl value = (DCountDownLatchImpl) region.computeIfAbsent(name,
         r -> new DCountDownLatchImpl(name, count));
     value.initialize(region, operationPerformer);
+
+    return value;
+  }
+
+  public DCounter createDCounter(String name) {
+    return createDCounter(name, 0);
+  }
+
+  public DCounter createDCounter(String name, int initialValue) {
+    DCounterImpl value = (DCounterImpl) region.computeIfAbsent(name,
+        r -> new DCounterImpl(name, initialValue));
+    value.initialize(region, operationPerformer);
+    region.put(name, value);
 
     return value;
   }
