@@ -15,7 +15,8 @@ import org.apache.geode.InvalidDeltaException;
  * Unlike other types in the package, this approach does not require co-ordinating (locking)
  * updates in a central location (primary bucket).
  * <p>
- * Heavily based on <a href="https://github.com/charliemblack/gemfire-delta-counter">charliemblack/gemfire-delta-counter</a>
+ * Heavily based on <a href=
+ * "https://github.com/charliemblack/gemfire-delta-counter">charliemblack/gemfire-delta-counter</a>
  */
 public class DCounterImpl extends AbstractDType implements DCounter {
 
