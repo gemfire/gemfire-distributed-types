@@ -63,6 +63,12 @@ public interface DSnowflake extends DType {
   long[] parse(long sequence);
 
   /**
+   * This is a no-op for DSnowflakes. Since nothing is distributed or stored for this type, there
+   * are no additional resources to release.
+   */
+  default void destroy() {};
+
+  /**
    * Provides a Builder used to create customized DSnowflakes.
    *
    * @return a new Builder
