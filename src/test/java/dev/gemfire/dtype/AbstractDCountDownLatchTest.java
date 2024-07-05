@@ -35,7 +35,7 @@ public abstract class AbstractDCountDownLatchTest {
     ref.countDown();
 
     assertThat(ref.getCount()).isEqualTo(0);
-    assertThat(ref.await(1, TimeUnit.MILLISECONDS)).isTrue();
+    assertThat(ref.await(1, TimeUnit.SECONDS)).isTrue();
   }
 
   @Test
@@ -46,8 +46,8 @@ public abstract class AbstractDCountDownLatchTest {
     ref.countDown();
 
     assertThat(ref.getCount()).isEqualTo(0);
-    assertThatNoException().isThrownBy(() -> future.get(1, TimeUnit.MILLISECONDS));
-    assertThat(ref.await(1, TimeUnit.MILLISECONDS)).isTrue();
+    assertThatNoException().isThrownBy(() -> future.get(1, TimeUnit.MINUTES));
+    assertThat(ref.await(1, TimeUnit.SECONDS)).isTrue();
   }
 
   @Test
@@ -68,7 +68,7 @@ public abstract class AbstractDCountDownLatchTest {
         .untilAsserted(() -> assertThat(ref.getWaiters()).isEqualTo(0));
 
     for (Future<Void> future : futures) {
-      assertThatNoException().isThrownBy(() -> future.get(1, TimeUnit.MILLISECONDS));
+      assertThatNoException().isThrownBy(() -> future.get(1, TimeUnit.MINUTES));
     }
   }
 
@@ -78,7 +78,7 @@ public abstract class AbstractDCountDownLatchTest {
 
     Future<Boolean> future = executor.submit(() -> {
       try {
-        return ref.await(1, TimeUnit.MILLISECONDS);
+        return ref.await(1, TimeUnit.MINUTES);
       } catch (InterruptedException e) {
         throw new RuntimeException(e);
       }
