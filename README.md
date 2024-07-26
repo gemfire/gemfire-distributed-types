@@ -111,8 +111,11 @@ dependencies {
 }
 ```
 
+If necessary, instructions to access the dependent GemFire artifacts can be found here -
+[gemfire.dev](https://gemfire.dev/quickstart/java/)
+
 In order to deploy the package to a GemFire cluster it should be added as an extension. The
-extension bundle can be found under (Releases)[https://github.com/gemfire/gemfire-distributed-types/releases].
+extension bundle can be found under [Releases](https://github.com/gemfire/gemfire-distributed-types/releases).
 The `.gfm` file should be added to the `extensions` directory within the GemFire distribution. 
 Look for a line in the logs that state `Initialized service for GemFire Distributed Types` to 
 verify that the extension has been found and initialized.
