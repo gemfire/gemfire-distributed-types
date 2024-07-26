@@ -36,12 +36,13 @@
     <maven.compiler.target>8</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <gemfire.version>10.1.1</gemfire.version>
+    <auto.publish>true</auto.publish>
   </properties>
 
   <repositories>
     <repository>
-      <id>gemfire-release-repo</id>
-      <url>https://commercial-repo.pivotal.io/data3/gemfire-release-repo/gemfire</url>
+      <id>gemfire-broadcom-repo</id>
+      <url>https://packages.broadcom.com/artifactory/gemfire</url>
     </repository>
   </repositories>
 
@@ -130,12 +131,11 @@
       <plugin>
         <groupId>org.sonatype.central</groupId>
         <artifactId>central-publishing-maven-plugin</artifactId>
-        <version>0.4.0</version>
+        <version>0.5.0</version>
         <extensions>true</extensions>
         <configuration>
           <publishingServerId>central</publishingServerId>
-          <tokenAuth>false</tokenAuth>
-          <autoPublish>false</autoPublish>
+          <autoPublish>${auto.publish}</autoPublish>
         </configuration>
       </plugin>
 
