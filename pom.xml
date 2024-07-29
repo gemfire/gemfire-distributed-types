@@ -6,7 +6,7 @@
 
   <groupId>dev.gemfire</groupId>
   <artifactId>gemfire-distributed-types</artifactId>
-  <version>0.1.0</version>
+  <version>0.1.1</version>
 
   <name>dev.gemfire:gemfire-distributed-types</name>
   <description>Provide a collection of distributed types compatible with GemFire</description>
