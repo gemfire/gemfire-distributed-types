@@ -17,8 +17,8 @@ repositories {
   mavenCentral()
 
   maven {
-    name = 'VMware Repository'
-    url = project.findProperty("commercialRepository") ?: "https://commercial-repo.pivotal.io/data3/gemfire-release-repo/gemfire"
+    name = 'Broadcom Repository'
+    url = project.findProperty("commercialRepository") ?: "https://packages.broadcom.com/artifactory/gemfire"
     credentials {
       username = System.getenv("COMMERCIAL_MAVEN_USERNAME")
       password = System.getenv("COMMERCIAL_MAVEN_PASSWORD")
