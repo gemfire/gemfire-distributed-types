@@ -98,7 +98,6 @@ problem when updates are being generated across a distributed system).
 The package can easily be used from either Maven or Gradle:
 
 #### Maven:
-
 ```xml
 <dependency>
   <groupId>dev.gemfire</groupId>
@@ -106,6 +105,7 @@ The package can easily be used from either Maven or Gradle:
   <version>0.1.0</version>
 </dependency>
 ```
+
 #### Gradle:
 ```groovy
 dependencies {
@@ -121,6 +121,18 @@ extension bundle can be found under [Releases](https://github.com/gemfire/gemfir
 The `.gfm` file should be added to the `extensions` directory within the GemFire distribution. 
 Look for a line in the logs that state `Initialized service for GemFire Distributed Types` to 
 verify that the extension has been found and initialized.
+
+### Building
+
+Building artifacts locally is best done using gradle. You will need to set the environment variables
+`COMMERCIAL_MAVEN_USERNAME` and `COMMERCIAL_MAVEN_PASSWORD` to the username and access token
+required by the Broadcom Maven repository:
+
+```shell
+export COMMERCIAL_MAVEN_USERNAME=<YOUR USERNAME>
+export COMMERCIAL_MAVEN_PASSWORD=<ACCESS TOKEN>
+./gradlew publishToMavenLocal extensionDistZip
+```
 
 ### Implementation details
 
