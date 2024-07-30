@@ -1,6 +1,6 @@
-[![javadoc](https://javadoc.io/badge2/dev.gemfire/gemfire-distributed-types/javadoc.svg)](https://javadoc.io/doc/dev.gemfire/gemfire-distributed-types)
-
 # GemFire Distributed Types
+
+[![javadoc](https://javadoc.io/badge2/dev.gemfire/gemfire-distributed-types/javadoc.svg)](https://javadoc.io/doc/dev.gemfire/gemfire-distributed-types)
 
 ### What is this?
 
