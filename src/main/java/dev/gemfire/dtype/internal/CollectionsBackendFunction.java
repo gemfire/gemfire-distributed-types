@@ -9,10 +9,13 @@ import static dev.gemfire.dtype.internal.OperationType.*;
 import java.util.concurrent.Callable;
 
 import org.apache.geode.cache.Region;
+import org.apache.geode.cache.RegionDestroyedException;
 import org.apache.geode.cache.execute.Function;
 import org.apache.geode.cache.execute.FunctionContext;
 import org.apache.geode.cache.execute.RegionFunctionContext;
 import org.apache.geode.internal.cache.PartitionedRegion;
+import org.apache.geode.internal.cache.PrimaryBucketLockException;
+import org.apache.geode.internal.cache.execute.BucketMovedException;
 
 public class CollectionsBackendFunction implements Function<Object> {
 
@@ -59,6 +62,8 @@ public class CollectionsBackendFunction implements Function<Object> {
             result = rex.getFailingResult();
             break;
           }
+        } catch (PrimaryBucketLockException | BucketMovedException | RegionDestroyedException ex) {
+          throw ex;
         } catch (Exception ex) {
           context.getResultSender().sendException(ex);
           return;
